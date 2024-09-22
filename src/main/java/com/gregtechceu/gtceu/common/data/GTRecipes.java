@@ -7,6 +7,7 @@ import com.gregtechceu.gtceu.data.recipe.configurable.RecipeAddition;
 import com.gregtechceu.gtceu.data.recipe.configurable.RecipeRemoval;
 import com.gregtechceu.gtceu.data.recipe.generated.*;
 import com.gregtechceu.gtceu.data.recipe.misc.*;
+import com.gregtechceu.gtceu.data.recipe.misc.nuclear.FissionLoader;
 import com.gregtechceu.gtceu.data.recipe.serialized.chemistry.ChemistryRecipes;
 
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -64,6 +65,7 @@ public class GTRecipes {
         CraftingRecipeLoader.init(consumer);
         FuelRecipes.init(consumer);
         FusionLoader.init(consumer);
+        FissionLoader.init(consumer);
         MachineRecipeLoader.init(consumer);
         AssemblerRecipeLoader.init(consumer);
         AssemblyLineLoader.init(consumer);

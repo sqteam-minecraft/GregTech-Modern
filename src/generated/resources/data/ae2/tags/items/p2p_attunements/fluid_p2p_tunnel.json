@@ -150,6 +150,8 @@
     "gtceu:nitrous_oxide_bucket",
     "gtceu:hydrochloric_acid_bucket",
     "gtceu:steam_bucket",
+    "gtceu:superheated_steam_bucket",
+    "gtceu:cold_water_bucket",
     "gtceu:distilled_water_bucket",
     "gtceu:sodium_potassium_bucket",
     "gtceu:manganese_phosphide_bucket",

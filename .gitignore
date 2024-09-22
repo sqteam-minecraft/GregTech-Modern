@@ -24,3 +24,6 @@ src/generated/resources/.cache/
 *.patch
 *.DS_Store
 
+Test World.zip
+src_with_well.zip
+

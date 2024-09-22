@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.api.capability;
 
 import com.gregtechceu.gtceu.api.capability.forge.GTCapability;
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMaintenanceMachine;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 
@@ -82,6 +83,11 @@ public class GTCapabilityHelper {
     @Nullable
     public static ICleanroomReceiver getCleanroomReceiver(Level level, BlockPos pos, @Nullable Direction side) {
         return getBlockEntityCapability(GTCapability.CAPABILITY_CLEANROOM_RECEIVER, level, pos, side);
+    }
+
+    @Nullable
+    public static IReactorElement getReactorElement(Level level, BlockPos pos, @Nullable Direction side) {
+        return getBlockEntityCapability(GTCapability.CAPABILITY_REACTOR_ELEMENT, level, pos, side);
     }
 
     @Nullable

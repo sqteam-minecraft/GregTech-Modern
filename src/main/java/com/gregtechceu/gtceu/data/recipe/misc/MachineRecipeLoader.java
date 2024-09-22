@@ -802,6 +802,12 @@ public class MachineRecipeLoader {
                 .inputItems(plate, Polyethylene, 6).inputFluids(Glass.getFluid(L))
                 .outputItems(GTBlocks.CLEANROOM_GLASS.asStack(2)).duration(200).save(provider);
 
+        ASSEMBLER_RECIPES.recipeBuilder("casing_reinforced_borosilicate_glass").EUt(256)
+                .inputItems(frameGt, BlackSteel).circuitMeta(6)
+                .inputFluids(BorosilicateGlass.getFluid(L * 4))
+                .outputItems(GTBlocks.CASING_REINFORCED_BOROSILICATE_GLASS.asStack(1))
+                .duration(300).save(provider);
+
         // If these recipes are changed, change the values in MaterialInfoLoader.java
 
         ASSEMBLER_RECIPES.recipeBuilder("hull_ulv").duration(25).EUt(16)

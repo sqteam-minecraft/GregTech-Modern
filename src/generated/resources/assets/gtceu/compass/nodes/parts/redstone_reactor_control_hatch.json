@@ -1,0 +1,15 @@
+{
+  "button_texture": {
+    "type": "item",
+    "res": "gtceu:redstone_reactor_control_hatch"
+  },
+  "items": [
+    "gtceu:redstone_reactor_control_hatch"
+  ],
+  "page": "gtceu:parts/redstone_reactor_control_hatch",
+  "position": [
+    -250,
+    150
+  ],
+  "section": "gtceu:parts"
+}

@@ -909,6 +909,10 @@ public class GTRecipeBuilder {
         return addData("eu_to_start", eu);
     }
 
+    public GTRecipeBuilder fissionStartHeat(long heat) {
+        return addData("heat_to_start", heat);
+    }
+
     public GTRecipeBuilder researchScan(boolean isScan) {
         return addData("scan_for_research", isScan);
     }

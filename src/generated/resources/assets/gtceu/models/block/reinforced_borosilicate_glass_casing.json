@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "gtceu:block/casings/nuclear/machine_casing_reinforced_borosilicate_glass"
+  }
+}

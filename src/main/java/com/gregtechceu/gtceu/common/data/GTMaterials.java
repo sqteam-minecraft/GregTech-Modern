@@ -612,6 +612,8 @@ public class GTMaterials {
     public static Material NeodymiumMagnetic;
     public static Material HydrochloricAcid;
     public static Material Steam;
+    public static Material SuperheatedSteam;
+    public static Material ColdWater;
     public static Material DistilledWater;
     public static Material SodiumPotassium;
     public static Material SamariumMagnetic;

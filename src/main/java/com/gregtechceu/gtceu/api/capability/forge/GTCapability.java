@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.api.capability.forge;
 
 import com.gregtechceu.gtceu.api.capability.*;
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMaintenanceMachine;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 
@@ -30,6 +31,8 @@ public class GTCapability {
     public static final Capability<IElectricItem> CAPABILITY_ELECTRIC_ITEM = CapabilityManager
             .get(new CapabilityToken<>() {});
     public static final Capability<ICleanroomReceiver> CAPABILITY_CLEANROOM_RECEIVER = CapabilityManager
+            .get(new CapabilityToken<>() {});
+    public static final Capability<IReactorElement> CAPABILITY_REACTOR_ELEMENT = CapabilityManager
             .get(new CapabilityToken<>() {});
     public static final Capability<IMaintenanceMachine> CAPABILITY_MAINTENANCE_MACHINE = CapabilityManager
             .get(new CapabilityToken<>() {});

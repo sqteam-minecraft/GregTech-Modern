@@ -1,0 +1,15 @@
+{
+  "button_texture": {
+    "type": "item",
+    "res": "gtceu:slow_neutron_fission_reactor"
+  },
+  "items": [
+    "gtceu:slow_neutron_fission_reactor"
+  ],
+  "page": "gtceu:multiblock/slow_neutron_fission_reactor",
+  "position": [
+    -50,
+    100
+  ],
+  "section": "gtceu:multiblock"
+}

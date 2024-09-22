@@ -503,6 +503,18 @@ public class MachineLang {
         provider.add("gtceu.multiblock.cleanroom.dirty_state", "Status: §4CONTAMINATED");
         provider.add("gtceu.multiblock.cleanroom.clean_amount", "Cleanliness: §a%s%%");
 
+        // Slow Neutron Fission Reactor
+        multiLang(provider, "gtceu.machine.fission_reactor.tooltip",
+                "Yes, Rico...",
+                "Arrange reactor elements inside to heat up the core",
+                "Melts down if stored heat is more than 1000 HU",
+                "Accepted fuel: Thorium",
+                "Pump cold coolant in through input hatch, get hot coolant through output hatch");
+        provider.add("gtceu.machine.fission_reactor.tooltip.hold_ctrl",
+                "Hold CTRL to show additional Structure Information");
+        provider.add("gtceu.multiblock.fission_reactor.heat", "Heat stored: §a%s HU");
+        provider.add("gtceu.multiblock.fission_reactor.throttle", "Throttle: §a%s%%");
+
         multiLang(provider, "gtceu.machine.charcoal_pile.tooltip",
                 "Turns Logs into §aCharcoal§7 when §cignited§7.",
                 "Right Click with fire-starting items to start.",

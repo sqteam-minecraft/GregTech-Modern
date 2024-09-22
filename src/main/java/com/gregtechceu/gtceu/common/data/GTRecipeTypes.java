@@ -673,6 +673,20 @@ public class GTRecipeTypes {
             .setXEIVisible(false);
 
     //////////////////////////////////////
+    // ****** Nuclear *******//
+    //////////////////////////////////////
+
+    public static final GTRecipeType FISSION_REACTOR_RECIPES = register("fission_reactor", MULTIBLOCK)
+            .setMaxIOSize(0, 0, 1, 1)
+            .setEUIO(IO.NONE)
+            .setProgressBar(GuiTextures.PROGRESS_BAR_CRACKING, LEFT_TO_RIGHT)
+            .setSlotOverlay(true, true, GuiTextures.OUT_SLOT_OVERLAY)
+            .setSlotOverlay(false, true, GuiTextures.IN_SLOT_OVERLAY)
+            .setSound(GTSoundEntries.COOLING)
+            .addDataInfo(data -> LocalizationUtils.format("gtceu.recipe.heat_to_start",
+                    NumberFormat.getCompactNumberInstance().format(data.getLong("heat_to_start"))));
+
+    //////////////////////////////////////
     // ****** Integration *******//
     //////////////////////////////////////
     @Nullable

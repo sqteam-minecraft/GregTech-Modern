@@ -7,6 +7,7 @@ import com.gregtechceu.gtceu.api.block.MetaMachineBlock;
 import com.gregtechceu.gtceu.api.blockentity.MetaMachineBlockEntity;
 import com.gregtechceu.gtceu.api.capability.IMiner;
 import com.gregtechceu.gtceu.api.capability.compat.FeCompat;
+import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
@@ -44,7 +45,9 @@ import com.gregtechceu.gtceu.common.machine.electric.*;
 import com.gregtechceu.gtceu.common.machine.multiblock.electric.*;
 import com.gregtechceu.gtceu.common.machine.multiblock.generator.LargeCombustionEngineMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.generator.LargeTurbineMachine;
+import com.gregtechceu.gtceu.common.machine.multiblock.nuclear.FissionReactorMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.*;
+import com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear.ReactorRedstoneControlHatch;
 import com.gregtechceu.gtceu.common.machine.multiblock.primitive.CharcoalPileIgniterMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.primitive.CokeOvenMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.primitive.PrimitiveBlastFurnaceMachine;
@@ -92,10 +95,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -1149,6 +1149,15 @@ public class GTMachines {
                     .register(),
             DUAL_HATCH_TIERS);
 
+    public static final MachineDefinition REDSTONE_REACTOR_CONTROL_HATCH = REGISTRATE
+            .machine("redstone_reactor_control_hatch", ReactorRedstoneControlHatch::new)
+            .rotationState(RotationState.ALL)
+            .abilities(PartAbility.REACTOR_REDSTONE_CONTROL)
+            .tooltips(Component.translatable("gtceu.universal.disabled"))
+            .renderer(() -> new OverlayTieredMachineRenderer(2, GTCEu.id("block/machine/part/redstone_reactor_control")))
+            .compassNodeSelf()
+            .register();
+
     public static final MachineDefinition[] DIODE = registerTieredMachines("diode",
             DiodePartMachine::new,
             (tier, builder) -> builder
@@ -2036,6 +2045,52 @@ public class GTMachines {
             .workableCasingRenderer(GTCEu.id("block/casings/cleanroom/plascrete"),
                     GTCEu.id("block/multiblock/cleanroom"))
             .compassSections(GTCompassSections.TIER[HV])
+            .compassNodeSelf()
+            .register();
+
+    public static final MultiblockMachineDefinition SLOW_NEUTRON_FISSION_REACTOR = REGISTRATE
+            .multiblock("slow_neutron_fission_reactor", holder -> new FissionReactorMachine(holder,
+                    FissionReactorType.TIER_1,
+                    new HashSet<>(ReactorFuel.THORIUM.ordinal())))
+            .rotationState(RotationState.NONE)
+            .recipeType(GTRecipeTypes.FISSION_REACTOR_RECIPES)
+            .recipeModifier(FissionReactorMachine::recipeModifier, true)
+            .appearanceBlock(CASING_STEEL_SOLID)
+            .tooltips(Component.translatable("gtceu.machine.fission_reactor.tooltip.0"),
+                    Component.translatable("gtceu.machine.fission_reactor.tooltip.1"),
+                    Component.translatable("gtceu.machine.fission_reactor.tooltip.2"))
+            .tooltipBuilder((stack, tooltip) -> {
+                if (GTUtil.isCtrlDown()) {
+                    tooltip.add(Component.empty());
+                    tooltip.add(Component.translatable("gtceu.machine.fission_reactor.tooltip.3"));
+                    tooltip.add(Component.translatable("gtceu.machine.fission_reactor.tooltip.4"));
+                    tooltip.add(Component.empty());
+                } else {
+                    tooltip.add(Component.translatable("gtceu.machine.fission_reactor.tooltip.hold_ctrl"));
+                }
+            })
+            .pattern((definition) -> FactoryBlockPattern.start()
+                    .aisle("XXXXX", "XWWWX", "XWWWX", "XWWWX", "XXXXX")
+                    .aisle("XWWWX", "W   W", "W   W", "W   W", "XWWWX")
+                    .aisle("XWWWX", "W   W", "W   W", "W   W", "XWCWX")
+                    .aisle("XWWWX", "W   W", "W   W", "W   W", "XWWWX")
+                    .aisle("XXXXX", "XWWWX", "XWWWX", "XWWWX", "XXXXX")
+                    .where('C', controller(blocks(definition.getBlock())))
+                    .where(' ', any())
+                    .where('X', blocks(GTBlocks.CASING_STEEL_SOLID.get())
+                            .or(abilities(PartAbility.MAINTENANCE)
+                                    .setMinGlobalLimited(ConfigHolder.INSTANCE.machines.enableMaintenance ? 1 : 0)
+                                    .setMaxGlobalLimited(1))
+                            .or(abilities(PartAbility.REACTOR_REDSTONE_CONTROL).setMaxGlobalLimited(1, 1)))
+                    .where('W', blocks(GTBlocks.CASING_REINFORCED_BOROSILICATE_GLASS.get())
+                            .or(abilities(PartAbility.IMPORT_FLUIDS).setMinGlobalLimited(1).setMaxGlobalLimited(8, 1))
+                            .or(abilities(PartAbility.EXPORT_FLUIDS).setMinGlobalLimited(1).setMaxGlobalLimited(8, 1)))
+                    .build())
+            .allowExtendedFacing(false)
+            .allowFlip(false)
+            .workableCasingRenderer(GTCEu.id("block/casings/solid/machine_casing_solid_steel"),
+                    GTCEu.id("block/multiblock/slow_neutron_fission_reactor"))
+            .compassSections(GTCompassSections.TIER[EV])
             .compassNodeSelf()
             .register();
 

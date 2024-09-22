@@ -1267,6 +1267,24 @@ public class FirstDegreeMaterials {
                 .components(Hydrogen, 2, Oxygen, 1)
                 .buildAndRegister();
 
+        SuperheatedSteam = new Material.Builder(GTCEu.id("superheated_steam"))
+                .gas(new FluidBuilder()
+                        .state(FluidState.GAS)
+                        .temperature(573))
+                .color(0xFAFAFA)
+                .flags(DISABLE_DECOMPOSITION)
+                .components(Hydrogen, 2, Oxygen, 1)
+                .buildAndRegister();
+
+        ColdWater = new Material.Builder(GTCEu.id("cold_water"))
+                .liquid(new FluidBuilder()
+                        .state(FluidState.LIQUID)
+                        .temperature(283))
+                .color(0x1E4096)
+                .flags(DISABLE_DECOMPOSITION)
+                .components(Hydrogen, 2, Oxygen, 1)
+                .buildAndRegister();
+
         DistilledWater = new Material.Builder(GTCEu.id("distilled_water"))
                 .fluid()
                 .color(0x4A94FF)

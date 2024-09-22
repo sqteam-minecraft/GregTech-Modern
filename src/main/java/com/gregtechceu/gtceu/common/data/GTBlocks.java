@@ -607,6 +607,11 @@ public class GTBlocks {
     public static final BlockEntry<Block> CASING_TUNGSTENSTEEL_TURBINE = createCasingBlock(
             "tungstensteel_turbine_casing", GTCEu.id("block/casings/mechanic/machine_casing_turbine_tungstensteel"));
 
+    // Nuclear
+    public static final BlockEntry<Block> CASING_REINFORCED_BOROSILICATE_GLASS = createGlassCasingBlock("reinforced_borosilicate_glass_casing",
+            GTCEu.id("block/casings/nuclear/machine_casing_reinforced_borosilicate_glass"),
+            () -> RenderType::translucent);
+
     // Pipe casings
     public static final BlockEntry<Block> CASING_BRONZE_PIPE = createCasingBlock("bronze_pipe_casing",
             GTCEu.id("block/casings/pipe/machine_casing_pipe_bronze"));
