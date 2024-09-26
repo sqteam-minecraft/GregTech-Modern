@@ -51,6 +51,7 @@ public class PartAbility {
     public static final PartAbility INPUT_LASER = new PartAbility("input_laser");
     public static final PartAbility OUTPUT_LASER = new PartAbility("output_laser");
     public static final PartAbility REACTOR_REDSTONE_CONTROL = new PartAbility("reactor_redstone_control");
+    public static final PartAbility REACTOR_FUEL_CONTROL = new PartAbility("reactor_fuel_control");
 
     public static final PartAbility COMPUTATION_DATA_RECEPTION = new PartAbility("computation_data_reception");
     public static final PartAbility COMPUTATION_DATA_TRANSMISSION = new PartAbility("computation_data_transmission");

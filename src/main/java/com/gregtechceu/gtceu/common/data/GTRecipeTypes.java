@@ -492,6 +492,11 @@ public class GTRecipeTypes {
             .setMaxTooltips(1)
             .setSound(GTSoundEntries.FURNACE);
 
+    public final static GTRecipeType HEAT_EXCHANGE_RECIPES = register("heat_exchanger", MULTIBLOCK)
+            .setMaxIOSize(0, 0, 2, 2)
+            .setProgressBar(GuiTextures.PROGRESS_BAR_ARROW_MULTIPLE, LEFT_TO_RIGHT)
+            .setSound(GTSoundEntries.BOILER);
+
     public final static GTRecipeType COKE_OVEN_RECIPES = register("coke_oven", MULTIBLOCK).setMaxIOSize(1, 1, 0, 1)
             .setProgressBar(GuiTextures.PROGRESS_BAR_ARROW, LEFT_TO_RIGHT)
             .setMaxTooltips(1)

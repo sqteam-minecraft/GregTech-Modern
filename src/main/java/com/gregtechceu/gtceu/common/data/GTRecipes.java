@@ -66,6 +66,7 @@ public class GTRecipes {
         FuelRecipes.init(consumer);
         FusionLoader.init(consumer);
         FissionLoader.init(consumer);
+        HeatExchangeLoader.init(consumer);
         MachineRecipeLoader.init(consumer);
         AssemblerRecipeLoader.init(consumer);
         AssemblyLineLoader.init(consumer);

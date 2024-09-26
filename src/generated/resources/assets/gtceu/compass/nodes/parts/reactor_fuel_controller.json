@@ -1,0 +1,15 @@
+{
+  "button_texture": {
+    "type": "item",
+    "res": "gtceu:reactor_fuel_controller"
+  },
+  "items": [
+    "gtceu:reactor_fuel_controller"
+  ],
+  "page": "gtceu:parts/reactor_fuel_controller",
+  "position": [
+    -200,
+    150
+  ],
+  "section": "gtceu:parts"
+}

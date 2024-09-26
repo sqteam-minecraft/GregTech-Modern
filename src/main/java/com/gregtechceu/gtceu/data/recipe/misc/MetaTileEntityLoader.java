@@ -609,6 +609,13 @@ public class MetaTileEntityLoader {
                 GTBlocks.CASING_INVAR_HEATPROOF.asStack(), 'C',
                 new UnificationEntry(TagPrefix.cableGtSingle, GTMaterials.Copper));
 
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "large_heat_exchanger",
+                GTMachines.LARGE_HEAT_EXCHANGER.asStack(), "TGT", "TCT", "PIP", 'T',
+                new UnificationEntry(TagPrefix.pipeNormalFluid, GTMaterials.Titanium), 'G',
+                new UnificationEntry(TagPrefix.plateDouble, GTMaterials.Graphene), 'C',
+                HULL.getIngredient(EV), 'P', PUMP.getIngredient(EV),
+                'I', CustomTags.IV_CIRCUITS);
+
         VanillaRecipeHelper.addShapedRecipe(provider, true, "large_steam_turbine",
                 GTMachines.LARGE_STEAM_TURBINE.asStack(), "PSP", "SAS", "CSC", 'S',
                 new UnificationEntry(TagPrefix.gear, GTMaterials.Steel), 'P', CustomTags.HV_CIRCUITS, 'A',

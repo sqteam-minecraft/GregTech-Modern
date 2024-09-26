@@ -9,8 +9,8 @@ import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.FISSION_REACTOR_RE
 
 public class FissionLoader {
     public static void init(Consumer<FinishedRecipe> provider) {
-        FISSION_REACTOR_RECIPES.recipeBuilder("fission_water_to_superheated_steam")
-                .inputFluids(GTMaterials.Water.getFluid(5))
+        FISSION_REACTOR_RECIPES.recipeBuilder("fission_distilled_water_to_superheated_steam")
+                .inputFluids(GTMaterials.DistilledWater.getFluid(5))
                 .outputFluids(GTMaterials.SuperheatedSteam.getFluid(5))
                 .duration(20)
                 .fissionStartHeat(200)

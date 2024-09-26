@@ -1,0 +1,15 @@
+{
+  "button_texture": {
+    "type": "item",
+    "res": "gtceu:large_heat_exchanger"
+  },
+  "items": [
+    "gtceu:large_heat_exchanger"
+  ],
+  "page": "gtceu:steam/large_heat_exchanger",
+  "position": [
+    -250,
+    200
+  ],
+  "section": "gtceu:steam"
+}

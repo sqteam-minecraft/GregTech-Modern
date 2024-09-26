@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.addon.AddonFinder;
 import com.gregtechceu.gtceu.api.addon.events.MaterialCasingCollectionEvent;
 import com.gregtechceu.gtceu.api.block.*;
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
@@ -611,6 +612,15 @@ public class GTBlocks {
     public static final BlockEntry<Block> CASING_REINFORCED_BOROSILICATE_GLASS = createGlassCasingBlock("reinforced_borosilicate_glass_casing",
             GTCEu.id("block/casings/nuclear/machine_casing_reinforced_borosilicate_glass"),
             () -> RenderType::translucent);
+    public static final BlockEntry<? extends IReactorFuelRod> FUEL_ROD = REGISTRATE
+            .block("fuel_rod", FuelRod::new)
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.isValidSpawn((state, level, pos, ent) -> false))
+            .blockstate(GTModels.createReactorFuelRodBlockModel("fuel_rod", GTCEu.id("block/nuclear/fuel_rod")))
+            .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
+            .item(BlockItem::new)
+            .build()
+            .register();
 
     // Pipe casings
     public static final BlockEntry<Block> CASING_BRONZE_PIPE = createCasingBlock("bronze_pipe_casing",

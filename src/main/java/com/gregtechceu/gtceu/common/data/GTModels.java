@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.block.ActiveBlock;
 import com.gregtechceu.gtceu.api.block.ICoilType;
 import com.gregtechceu.gtceu.api.block.IFilterType;
 import com.gregtechceu.gtceu.api.block.IFusionCasingType;
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
 import com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialIconSet;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
 import com.gregtechceu.gtceu.api.fluids.GTFluid;
@@ -259,6 +260,13 @@ public class GTModels {
                     GTCEu.id("block/casings/battery/" + batteryData.getBatteryName() + "/side"),
                     GTCEu.id("block/casings/battery/" + batteryData.getBatteryName() + "/top"),
                     GTCEu.id("block/casings/battery/" + batteryData.getBatteryName() + "/top")));
+        };
+    }
+
+    public static NonNullBiConsumer<DataGenContext<Block, FuelRod>, RegistrateBlockstateProvider> createReactorFuelRodBlockModel(String name,
+                                                                                                                                            ResourceLocation texture) {
+        return (ctx, prov) -> {
+            prov.simpleBlock(ctx.getEntry(), prov.models().cubeAll(name, texture));
         };
     }
 

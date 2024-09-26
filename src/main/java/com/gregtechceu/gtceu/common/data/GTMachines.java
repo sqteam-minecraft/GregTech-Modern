@@ -47,12 +47,14 @@ import com.gregtechceu.gtceu.common.machine.multiblock.generator.LargeCombustion
 import com.gregtechceu.gtceu.common.machine.multiblock.generator.LargeTurbineMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.nuclear.FissionReactorMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.*;
+import com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear.ReactorFuelController;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear.ReactorRedstoneControlHatch;
 import com.gregtechceu.gtceu.common.machine.multiblock.primitive.CharcoalPileIgniterMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.primitive.CokeOvenMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.primitive.PrimitiveBlastFurnaceMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.primitive.PrimitivePumpMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.steam.LargeBoilerMachine;
+import com.gregtechceu.gtceu.common.machine.multiblock.steam.LargeHeatExchanger;
 import com.gregtechceu.gtceu.common.machine.multiblock.steam.SteamParallelMultiblockMachine;
 import com.gregtechceu.gtceu.common.machine.steam.SteamLiquidBoilerMachine;
 import com.gregtechceu.gtceu.common.machine.steam.SteamMinerMachine;
@@ -1158,6 +1160,16 @@ public class GTMachines {
             .compassNodeSelf()
             .register();
 
+    public static final MachineDefinition REACTOR_FUEL_CONTROLLER = REGISTRATE
+            .machine("reactor_fuel_controller",
+            holder -> new ReactorFuelController(holder, 4))
+            .rotationState(RotationState.Y_AXIS)
+            .abilities(PartAbility.REACTOR_FUEL_CONTROL)
+            .tooltips(Component.translatable("gtceu.universal.disabled"))
+            .renderer(() -> new OverlayTieredMachineRenderer(4, GTCEu.id("block/machine/part/reactor_fuel_controller")))
+            .compassNodeSelf()
+            .register();
+
     public static final MachineDefinition[] DIODE = registerTieredMachines("diode",
             DiodePartMachine::new,
             (tier, builder) -> builder
@@ -2052,6 +2064,7 @@ public class GTMachines {
             .multiblock("slow_neutron_fission_reactor", holder -> new FissionReactorMachine(holder,
                     FissionReactorType.TIER_1,
                     new HashSet<>(ReactorFuel.THORIUM.ordinal())))
+            .langValue("Slow-Neutron Fission Reactor")
             .rotationState(RotationState.NONE)
             .recipeType(GTRecipeTypes.FISSION_REACTOR_RECIPES)
             .recipeModifier(FissionReactorMachine::recipeModifier, true)
@@ -2083,8 +2096,8 @@ public class GTMachines {
                                     .setMaxGlobalLimited(1))
                             .or(abilities(PartAbility.REACTOR_REDSTONE_CONTROL).setMaxGlobalLimited(1, 1)))
                     .where('W', blocks(GTBlocks.CASING_REINFORCED_BOROSILICATE_GLASS.get())
-                            .or(abilities(PartAbility.IMPORT_FLUIDS).setMinGlobalLimited(1).setMaxGlobalLimited(8, 1))
-                            .or(abilities(PartAbility.EXPORT_FLUIDS).setMinGlobalLimited(1).setMaxGlobalLimited(8, 1)))
+                            .or(abilities(PartAbility.IMPORT_FLUIDS).setMinGlobalLimited(1))
+                            .or(abilities(PartAbility.EXPORT_FLUIDS).setMinGlobalLimited(1)))
                     .build())
             .allowExtendedFacing(false)
             .allowFlip(false)
@@ -2093,6 +2106,12 @@ public class GTMachines {
             .compassSections(GTCompassSections.TIER[EV])
             .compassNodeSelf()
             .register();
+
+    public static final MultiblockMachineDefinition LARGE_HEAT_EXCHANGER = registerLargeHeatExchanger(
+            "large_heat_exchanger",
+            CASING_TITANIUM_STABLE, CASING_TITANIUM_PIPE,
+            GTCEu.id("block/casings/solid/machine_casing_stable_titanium"),
+            GTCEu.id("block/multiblock/large_heat_exchanger"));
 
     public static final MultiblockMachineDefinition LARGE_COMBUSTION_ENGINE = registerLargeCombustionEngine(
             "large_combustion_engine", EV,
@@ -2588,6 +2607,41 @@ public class GTMachines {
                                 .withStyle(ChatFormatting.DARK_RED))
                 .compassSections(GTCompassSections.STEAM)
                 .compassNode("large_boiler")
+                .register();
+    }
+
+    public static MultiblockMachineDefinition registerLargeHeatExchanger(String name, Supplier<? extends Block> casing,
+                                                                         Supplier<? extends Block> pipe,
+                                                                         ResourceLocation texture,
+                                                                         ResourceLocation overlayTexture)
+    {
+        return REGISTRATE
+                .multiblock("large_heat_exchanger", LargeHeatExchanger::new)
+                .rotationState(RotationState.ALL)
+                .recipeType(GTRecipeTypes.HEAT_EXCHANGE_RECIPES)
+                .recipeModifier(LargeHeatExchanger::recipeModifier, true)
+                .appearanceBlock(casing)
+                .pattern((definition) -> FactoryBlockPattern.start()
+                        .aisle("XXXXX", "XCWHX", "XXXXX")
+                        .aisle("XCWHX", "OPPPI", "XCWHX")
+                        .aisle("XXXXX", "XCSHX", "XXXXX")
+                        .where('S', controller(blocks(definition.getBlock())))
+                        .where('X', blocks(casing.get()))
+                        .where('P', blocks(pipe.get()))
+                        .where('I', abilities(PartAbility.IMPORT_FLUIDS))
+                        .where('O', abilities(PartAbility.EXPORT_FLUIDS))
+                        .where('C', blocks(casing.get())
+                                .or(abilities(PartAbility.IMPORT_FLUIDS).setExactLimit(1)))
+                        .where('H', blocks(casing.get())
+                                .or(abilities(PartAbility.EXPORT_FLUIDS).setExactLimit(1)))
+                        .where('W', blocks(casing.get())
+                                .or(autoAbilities(true, false, false)))
+                        .build())
+                .allowExtendedFacing(true)
+                .allowFlip(false)
+                .workableCasingRenderer(texture, overlayTexture)
+                .compassSections(GTCompassSections.STEAM)
+                .compassNodeSelf()
                 .register();
     }
 

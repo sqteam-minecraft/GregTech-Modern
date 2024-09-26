@@ -2,24 +2,18 @@ package com.gregtechceu.gtceu.common.machine.multiblock.nuclear;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.gregtechceu.gtceu.api.capability.IEnergyContainer;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
-import com.gregtechceu.gtceu.api.capability.recipe.EURecipeCapability;
-import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.IDataInfoProvider;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDisplayUIMachine;
-import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMaintenanceMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.machine.feature.nuclear.IFissionReactor;
 import com.gregtechceu.gtceu.api.machine.multiblock.FissionReactorType;
 import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableMultiblockMachine;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
-import com.gregtechceu.gtceu.api.misc.EnergyContainerList;
 import com.gregtechceu.gtceu.api.pattern.BlockPattern;
 import com.gregtechceu.gtceu.api.pattern.FactoryBlockPattern;
 import com.gregtechceu.gtceu.api.pattern.Predicates;
@@ -30,14 +24,12 @@ import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
 import com.gregtechceu.gtceu.api.recipe.logic.OCResult;
 import com.gregtechceu.gtceu.common.capability.EnvironmentalHazardSavedData;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
-import com.gregtechceu.gtceu.common.data.GTMachines;
 import com.gregtechceu.gtceu.common.data.GTRecipeModifiers;
 import com.gregtechceu.gtceu.common.item.PortableScannerBehavior;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear.ReactorRedstoneControlHatch;
 import com.gregtechceu.gtceu.utils.GTUtil;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.ChatFormatting;
@@ -46,11 +38,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.logging.log4j.core.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -113,10 +105,17 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     public void onLoad() {
         super.onLoad();
 
-        if (true) {
-            if (subscription == null) {
-                subscription = subscribeServerTick(subscription, this::updateHeat);
-            }
+        if (getLevel() instanceof ServerLevel serverLevel) {
+            serverLevel.getServer().tell(new TickTask(0, this::updateHeatSubscription));
+        }
+    }
+
+    protected void updateHeatSubscription() {
+        if (heat > 0) {
+            subscription = subscribeServerTick(subscription, this::updateHeat);
+        } else if (subscription != null) {
+            subscription.unsubscribe();
+            subscription = null;
         }
     }
 
@@ -138,7 +137,6 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         if (throttle != 15 && tick % (throttle + 1) == 0)
             heat = Mth.clamp(heat + 1, MIN_HEAT, MAX_HEAT);
 
-        if (heat < 100) recipeLogic.setStatus(RecipeLogic.Status.IDLE);
         if (heat >= MAX_HEAT) {
             // todo meltdown
         }
@@ -165,8 +163,6 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         // get the amount of parallel required to match the speed of heat generation
         int maxParallel = Mth.clamp(reactorMachine.excessHeat * singleHeatConsumption, 1, limitMaxParallel);
 
-        reactorMachine.heat = Math.max(reactorMachine.heat - singleHeatConsumption * maxParallel, MIN_HEAT);
-
         var parallelResult = GTRecipeModifiers.fastParallel(reactorMachine, recipe, maxParallel, false);
 
         recipe = new GTRecipe(recipe.recipeType, recipe.id,
@@ -176,6 +172,8 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
                 recipe.tickInputChanceLogics, recipe.tickOutputChanceLogics, recipe.conditions,
                 recipe.ingredientActions,
                 recipe.data, recipe.duration, false);
+
+        reactorMachine.heat = Math.max(reactorMachine.heat - singleHeatConsumption * parallelResult.getSecond(), MIN_HEAT);
 
         result.init(0, recipe.duration, parallelResult.getSecond(), params.getOcAmount());
 
@@ -407,11 +405,11 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
                 .where('C', Predicates.controller(Predicates.blocks(this.getDefinition().get())))
                 .where('B', states(getCasingState()).or(basePredicate))
                 .where('W', wallPredicate
-                        .or(abilities(PartAbility.EXPORT_FLUIDS).setMinGlobalLimited(1))
-                        .or(abilities(PartAbility.IMPORT_FLUIDS).setMinGlobalLimited(1)))
+                        .or(abilities(PartAbility.EXPORT_FLUIDS).setMinGlobalLimited(1).setMaxGlobalLimited(8))
+                        .or(abilities(PartAbility.IMPORT_FLUIDS).setMinGlobalLimited(1).setMaxGlobalLimited(8)))
                 .where('K', wallPredicate) // the block beneath the controller must only be a casing for structure
                 // dimension checks
-                .where(' ', innerPredicate())
+                .where(' ', innerPredicate().or(states(getCasingState())))
                 .build();
     }
 

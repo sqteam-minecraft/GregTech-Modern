@@ -1,0 +1,10 @@
+{
+  "parent": "gtceu:block/overlay/front_emissive",
+  "textures": {
+    "particle": "gtceu:block/overlay/machine/overlay_reactor_fuel_controller",
+    "overlay": "gtceu:block/overlay/machine/overlay_reactor_fuel_controller",
+    "overlay_emissive": "gtceu:block/overlay/machine/overlay_reactor_fuel_controller_emissive",
+    "overlay_active": "gtceu:block/overlay/machine/overlay_reactor_fuel_controller_active",
+    "overlay_active_emissive": "gtceu:block/overlay/machine/overlay_reactor_fuel_controller_active_emissive"
+  }
+}
