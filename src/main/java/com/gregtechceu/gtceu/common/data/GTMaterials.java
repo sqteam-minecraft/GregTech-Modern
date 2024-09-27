@@ -606,6 +606,9 @@ public class GTMaterials {
     public static Material UraniumHexafluoride;
     public static Material EnrichedUraniumHexafluoride;
     public static Material DepletedUraniumHexafluoride;
+    public static Material UraniumFissionFuel;
+    public static Material ThoriumFissionFuel;
+    public static Material PlutoniumFissionFuel;
     public static Material NitrousOxide;
     public static Material EnderPearl;
     public static Material PotassiumFeldspar;
@@ -886,6 +889,7 @@ public class GTMaterials {
     public static Material UUMatter;
     public static Material PCBCoolant;
     public static Material Sculk;
+
 
     /**
      * Second Degree Compounds

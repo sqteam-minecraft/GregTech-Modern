@@ -19,7 +19,7 @@ classes/
 .settings
 *.launch
 .architectury-transformer/debug.log
-src/generated/resources/.cache/
+src/generated/
 
 *.patch
 *.DS_Store

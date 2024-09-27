@@ -3,6 +3,7 @@ package com.gregtechceu.gtceu.common.block;
 import com.gregtechceu.gtceu.api.block.AppearanceBlock;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelConnector;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
+import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
 import com.gregtechceu.gtceu.api.machine.feature.nuclear.IFissionReactor;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import lombok.Getter;
@@ -35,6 +36,7 @@ public class FuelRod extends AppearanceBlock implements IReactorFuelRod {
                 .setValue(V_LINK, VLinkTypes.NONE)
                 .setValue(RODS, 0b11_10_01_00));
     }
+
 
     @Override
     public int getUses() {
