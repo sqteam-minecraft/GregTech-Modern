@@ -8,6 +8,7 @@ import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDistinctPart;
+import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.MultiblockPartMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.TieredIOPartMachine;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
@@ -17,11 +18,13 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 import lombok.Getter;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class ReactorFuelController extends TieredIOPartMachine implements IDistinctPart, IMachineLife {
+public class ReactorFuelController extends TieredIOPartMachine implements IMachineLife {
 
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ReactorFuelController.class,
             MultiblockPartMachine.MANAGED_FIELD_HOLDER);
@@ -39,51 +42,38 @@ public class ReactorFuelController extends TieredIOPartMachine implements IDisti
         return MANAGED_FIELD_HOLDER;
     }
 
-
-    @Override
-    public void onLoad()
-    {
-        super.onLoad();
-        if (inventory.getSize() == 0) {
-            inventory = createInventory();
-        }
-    }
-
     @Override
     public void onMachineRemoved() {
         clearInventory(inventory.storage);
-    }
-
-    @Override
-    public boolean isDistinct() {
-        return inventory.isDistinct();
-    }
-
-    @Override
-    public void setDistinct(boolean isDistinct) {
-        inventory.setDistinct(isDistinct);
     }
 
     protected NotifiableItemStackHandler createInventory() {
         return new NotifiableItemStackHandler(this, getInventorySize(), io);
     }
 
+    @Override
+    public void addedToController(IMultiController controller)
+    {
+        super.addedToController(controller);
+        if (inventory.getSize() == 0) {
+            inventory = createInventory();
+        }
+    }
+
     protected int getInventorySize() {
-        int size = 0;
-
-        BlockPos pos = getPos();
-
-        Level level = getLevel();
-
+        ServerLevel level = (ServerLevel) getLevel();
         if (level == null) return 0;
 
-//        for (int i = 1; i < 15; i++) {
-//            if (level.getBlockState(pos.below(i)).getBlock() instanceof IReactorFuelRod) {
-//                size++;
-//            } else {
-//                break;
-//            }
-//        }
+        int size = 0;
+        BlockPos pos = getPos();
+
+        for (int i = 1; i < 15; i++) {
+            if (level.getBlockState(pos.below(i)).getBlock() instanceof IReactorFuelRod) {
+                size++;
+            } else {
+                break;
+            }
+        }
 
         return size;
     }
@@ -104,10 +94,6 @@ public class ReactorFuelController extends TieredIOPartMachine implements IDisti
         group.addWidget(container);
 
         return group;
-    }
-
-    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
-        IDistinctPart.super.attachConfigurators(configuratorPanel);
     }
 
     public void updateFuelRods() {
