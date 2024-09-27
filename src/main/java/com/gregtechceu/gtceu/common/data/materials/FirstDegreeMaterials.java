@@ -1222,6 +1222,13 @@ public class FirstDegreeMaterials {
                 .components(Uranium238, 1, Fluorine, 6)
                 .buildAndRegister();
 
+        UraniumFissionFuel = new Material.Builder(GTCEu.id("uranium_fission_fuel"))
+                .dust()
+                .color(0x42D126)
+                .flags(DISABLE_DECOMPOSITION)
+                .components(Uranium235, 1, Uranium238, 1, Oxygen, 4)
+                .buildAndRegister();
+
         NitrousOxide = new Material.Builder(GTCEu.id("nitrous_oxide"))
                 .gas()
                 .color(0x7DC8FF)

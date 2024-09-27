@@ -572,5 +572,9 @@ public class UnknownCompositionMaterials {
                 .color(0xfabf29)
                 .flags(NO_SMELTING)
                 .buildAndRegister();
+
+
+        //ThoriumFissionFuel;
+        //PlutoniumFissionFuel;
     }
 }
