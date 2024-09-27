@@ -1,5 +1,6 @@
 package com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear;
 
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelConnector;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
@@ -20,8 +21,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-@Getter
-public class ReactorFuelController extends TieredIOPartMachine implements IDistinctPart, IMachineLife  {
+public class ReactorFuelController extends TieredIOPartMachine implements IDistinctPart, IMachineLife, IReactorFuelConnector {
+
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ReactorFuelController.class,
+            MultiblockPartMachine.MANAGED_FIELD_HOLDER);
+    @Getter
     @Persisted
     private NotifiableItemStackHandler inventory;
 
@@ -30,13 +34,11 @@ public class ReactorFuelController extends TieredIOPartMachine implements IDisti
         this.inventory = createInventory();
     }
 
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ReactorFuelController.class,
-            MultiblockPartMachine.MANAGED_FIELD_HOLDER);
-
     @Override
     public @NotNull ManagedFieldHolder getFieldHolder() {
         return MANAGED_FIELD_HOLDER;
     }
+
 
     @Override
     public void onLoad()
@@ -72,15 +74,16 @@ public class ReactorFuelController extends TieredIOPartMachine implements IDisti
         BlockPos pos = getPos();
 
         Level level = getLevel();
+
         if (level == null) return 0;
 
-        for (int i = 1; i < 15; i++) {
-            if (level.getBlockState(pos.below(i)).getBlock() instanceof IReactorFuelRod) {
-                size++;
-            } else {
-                break;
-            }
-        }
+//        for (int i = 1; i < 15; i++) {
+//            if (level.getBlockState(pos.below(i)).getBlock() instanceof IReactorFuelRod) {
+//                size++;
+//            } else {
+//                break;
+//            }
+//        }
 
         return size;
     }
@@ -105,5 +108,9 @@ public class ReactorFuelController extends TieredIOPartMachine implements IDisti
 
     public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
         IDistinctPart.super.attachConfigurators(configuratorPanel);
+    }
+
+    public void updateFuelRods() {
+
     }
 }
