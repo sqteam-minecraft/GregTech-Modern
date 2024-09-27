@@ -1,0 +1,24 @@
+{
+	"parent": "block/block",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "gtceu:block/nuclear/thorium_rod",
+		"particle": "gtceu:block/nuclear/thorium_rod"
+	},
+	"elements": [
+		{
+			"name": "fuel_1",
+			"from": [1, 0, 1],
+			"to": [3, 16, 3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [1, 0, 1]},
+			"faces": {
+				"north": {"uv": [0, 0, 2, 16], "texture": "#0"},
+				"east": {"uv": [2, 0, 4, 16], "texture": "#0"},
+				"south": {"uv": [4, 0, 6, 16], "texture": "#0"},
+				"west": {"uv": [6, 0, 8, 16], "texture": "#0"},
+				"up": {"uv": [10, 0, 12, 2], "texture": "#0"},
+				"down": {"uv": [8, 0, 10, 2], "texture": "#0"}
+			}
+		}
+	]
+}

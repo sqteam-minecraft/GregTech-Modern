@@ -26,6 +26,7 @@ import com.gregtechceu.gtceu.common.capability.EnvironmentalHazardSavedData;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
 import com.gregtechceu.gtceu.common.data.GTRecipeModifiers;
 import com.gregtechceu.gtceu.common.item.PortableScannerBehavior;
+import com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear.ReactorFuelController;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear.ReactorRedstoneControlHatch;
 import com.gregtechceu.gtceu.utils.GTUtil;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
@@ -111,9 +112,9 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     }
 
     protected void updateHeatSubscription() {
-        if (heat > 0) {
-            subscription = subscribeServerTick(subscription, this::updateHeat);
-        } else if (subscription != null) {
+        if (subscription == null) {
+            subscription = subscribeServerTick(null, this::updateHeat);
+        } else {
             subscription.unsubscribe();
             subscription = null;
         }
@@ -188,6 +189,9 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         for (IMultiPart part : getParts()) {
             if (part instanceof ReactorRedstoneControlHatch hatch) {
                 this.redstoneControl = hatch;
+            }
+            if (part instanceof ReactorFuelController fuelController) {
+                fuelController.updateFuelRods();
             }
         }
     }
@@ -327,6 +331,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         // build each row of the structure
         StringBuilder borderBuilder = new StringBuilder();     // BBBBB
         StringBuilder wallBuilder = new StringBuilder();       // BWWWB
+        StringBuilder roofBuilder = new StringBuilder();       // BRRRB
         StringBuilder insideBuilder = new StringBuilder();     // W   W
         StringBuilder controllerBuilder = new StringBuilder(); // BWCWB
         StringBuilder centerBuilder = new StringBuilder();     // BWKWB
@@ -339,11 +344,13 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
                 insideBuilder.append("W");
                 controllerBuilder.append("B");
                 centerBuilder.append("B");
+                roofBuilder.append("B");
             } else {
                 insideBuilder.append(" ");
                 wallBuilder.append("W");
-                controllerBuilder.append("W");
+                controllerBuilder.append("R");
                 centerBuilder.append("W");
+                roofBuilder.append("R");
             }
         }
 
@@ -353,6 +360,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         insideBuilder.append(" ");
         controllerBuilder.append("C");
         centerBuilder.append("K");
+        roofBuilder.append("R");
 
         // everything to the right of the controller
         for (int i = 0; i < rDist; i++) {
@@ -362,11 +370,13 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
                 insideBuilder.append("W");
                 controllerBuilder.append("B");
                 centerBuilder.append("B");
+                roofBuilder.append("B");
             } else {
                 insideBuilder.append(" ");
                 wallBuilder.append("W");
                 controllerBuilder.append("W");
                 centerBuilder.append("W");
+                roofBuilder.append("R");
             }
         }
 
@@ -379,7 +389,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         String[] slice = new String[hDist + 1]; // "BWWWB", "W   W", "W   W", "W   W", "BWWWB"
         Arrays.fill(slice, insideBuilder.toString());
         slice[0] = wallBuilder.toString();
-        slice[slice.length - 1] = wallBuilder.toString();
+        slice[slice.length - 1] = roofBuilder.toString();
 
         String[] center = Arrays.copyOf(slice, slice.length); // "BWKWB", "W   W", "W   W", "W   W", "BWCWB"
         if (this.getFrontFacing() == Direction.NORTH || this.getFrontFacing() == Direction.SOUTH) {
@@ -410,6 +420,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
                 .where('K', wallPredicate) // the block beneath the controller must only be a casing for structure
                 // dimension checks
                 .where(' ', innerPredicate().or(states(getCasingState())))
+                .where('R', wallPredicate.or(abilities(PartAbility.REACTOR_FUEL_CONTROL)))
                 .build();
     }
 
@@ -426,8 +437,8 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         return new TraceabilityPredicate(blockWorldState -> {
             Set<IReactorElement> elements = blockWorldState.getMatchContext().getOrCreate("reactorElement",
                     Sets::newHashSet);
-            // all non-GTMachines are allowed inside by default
             BlockState block = blockWorldState.getBlockState();
+
 //            if (blockEntity != null) {
 //                var element = GTCapabilityHelper.getReactorElement(blockWorldState.getWorld(),
 //                        blockWorldState.getPos(), null);

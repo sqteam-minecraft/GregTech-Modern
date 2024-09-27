@@ -615,8 +615,8 @@ public class GTBlocks {
     public static final BlockEntry<? extends IReactorFuelRod> FUEL_ROD = REGISTRATE
             .block("fuel_rod", FuelRod::new)
             .initialProperties(() -> Blocks.IRON_BLOCK)
-            .properties(p -> p.isValidSpawn((state, level, pos, ent) -> false))
-            .blockstate(GTModels.createReactorFuelRodBlockModel("fuel_rod", GTCEu.id("block/nuclear/fuel_rod")))
+            .properties(p -> p.isValidSpawn((state, level, pos, ent) -> false).noOcclusion())
+            .blockstate(GTModels.createReactorFuelRodBlockModel("fuel_rod"))
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
             .item(BlockItem::new)
             .build()

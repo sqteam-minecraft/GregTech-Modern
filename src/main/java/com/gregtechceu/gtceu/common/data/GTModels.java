@@ -6,7 +6,6 @@ import com.gregtechceu.gtceu.api.block.ActiveBlock;
 import com.gregtechceu.gtceu.api.block.ICoilType;
 import com.gregtechceu.gtceu.api.block.IFilterType;
 import com.gregtechceu.gtceu.api.block.IFusionCasingType;
-import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
 import com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialIconSet;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
 import com.gregtechceu.gtceu.api.fluids.GTFluid;
@@ -26,10 +25,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ModelBuilder;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.client.model.generators.ModelProvider;
+import net.minecraftforge.client.model.generators.*;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import com.google.gson.JsonObject;
@@ -37,9 +33,11 @@ import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.providers.RegistrateItemModelProvider;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
+import org.joml.Vector3f;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author KilaBash
@@ -263,10 +261,103 @@ public class GTModels {
         };
     }
 
-    public static NonNullBiConsumer<DataGenContext<Block, FuelRod>, RegistrateBlockstateProvider> createReactorFuelRodBlockModel(String name,
-                                                                                                                                            ResourceLocation texture) {
+    public static NonNullBiConsumer<DataGenContext<Block, FuelRod>, RegistrateBlockstateProvider> createReactorFuelRodBlockModel(String name) {
         return (ctx, prov) -> {
-            prov.simpleBlock(ctx.getEntry(), prov.models().cubeAll(name, texture));
+            ModelFile parentBase = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name));
+            ModelBuilder<?> model = prov.models()
+                    .getBuilder(ctx.getName())
+                    .parent(parentBase);
+            ModelFile parentBaseLinkUp = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name + "_link_up"));
+            ModelBuilder<?> modelLinkUp = prov.models()
+                    .getBuilder(ctx.getName() + "_link_up")
+                    .parent(parentBaseLinkUp);
+            ModelFile parentBaseLinkDown = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name + "_link_down"));
+            ModelBuilder<?> modelLinkDown = prov.models()
+                    .getBuilder(ctx.getName() + "_link_down")
+                    .parent(parentBaseLinkDown);
+            ModelFile parentBaseCore = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name + "_core"));
+
+            AtomicReference<MultiPartBlockStateBuilder> builder = new AtomicReference<>(prov.getMultipartBuilder(ctx.getEntry())
+                    .part()
+                    .modelFile(model)
+                    .addModel()
+                    .end()
+                    .part()
+                    .modelFile(modelLinkUp)
+                    .addModel()
+                    .condition(FuelRod.V_LINK, FuelRod.VLinkTypes.UP, FuelRod.VLinkTypes.BOTH)
+                    .end()
+                    .part()
+                    .modelFile(modelLinkDown)
+                    .addModel().condition(FuelRod.V_LINK, FuelRod.VLinkTypes.DOWN, FuelRod.VLinkTypes.BOTH)
+                    .end());
+
+            float scaleSmall = (1f / 16) * 3;
+            float scaleBig = (1f / 16) * 9;
+
+            FuelRod.RODS.getPossibleValues().forEach(state -> {
+                int mask = 0b11;
+                for (int i = 0; i < 4; i++) {
+                    int rods = ((state >> i * 2) & mask);
+                    rods = rods == mask ? 4 : rods;
+                    for (int j = 0; j < rods; j++) {
+                        var translation = new Vector3f(scaleSmall * (j % 2), 0, scaleSmall * (j >> 1));
+                        translation.add(new Vector3f(scaleBig * (i % 2), 0, scaleBig * (i >> 1)));
+                        ModelBuilder<?> modelCore = prov.models()
+                                .getBuilder(ctx.getName() + "_core_" + i * 4 + j)
+                                .rootTransforms()
+                                .translation(translation)
+                                .end()
+                                .parent(parentBaseCore);
+
+                        builder.set(builder.get().part()
+                                .modelFile(modelCore)
+                                .addModel().condition(FuelRod.RODS, state)
+                                .end());
+                    }
+                }
+            });
+
+
+
+            //return builder.part().build();
+
+
+            //prov.getVariantBuilder(ctx.getEntry())
+            //        .partialState().with(FuelRod.V_LINK, FuelRod.VLinkTypes.UP)
+            //        .modelForState().modelFile(model)
+            //        .nextModel().modelFile(modelLinkUp).addModel()
+            //        .partialState().with(FuelRod.V_LINK, FuelRod.VLinkTypes.DOWN)
+            //        .modelForState().modelFile(model)
+            //        .nextModel().modelFile(modelLinkDown).addModel()
+            //        .partialState().with(FuelRod.V_LINK, FuelRod.VLinkTypes.BOTH)
+            //        .modelForState().modelFile(model)
+            //        .nextModel().modelFile(modelLinkUp)
+            //        .nextModel().modelFile(modelLinkDown).addModel()
+            //        .partialState().with(FuelRod.V_LINK, FuelRod.VLinkTypes.NONE)
+            //        .modelForState().modelFile(model).addModel();
+
+            /*prov.getVariantBuilder(ctx.getEntry()).forAllStates(state -> {
+
+
+                var builder = ConfiguredModel.builder()
+                        .modelFile(model);
+
+
+
+                //return prov.getMultipartBuilder(ctx.getEntry()).part().modelFile(model).nextModel().modelFile(modelLinkUp).build();
+
+
+//                return (switch (state.getValue(FuelRod.V_LINK)) {
+//                    case UP ->   builder.nextModel().modelFile(modelLinkUp);
+//                    case DOWN -> builder.nextModel().modelFile(modelLinkDown);
+//                    case BOTH -> builder.nextModel().modelFile(modelLinkDown).nextModel().modelFile(modelLinkUp);
+//                    case NONE -> builder;
+//                }).build();
+                //if (blockState.getValue())
+                //if (ctx.getEntry().getFissionReactor()!=null)
+
+            });*/
         };
     }
 

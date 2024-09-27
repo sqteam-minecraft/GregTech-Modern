@@ -7,8 +7,7 @@ import javax.annotation.Nullable;
 /**
  * Implement this interface in order to make a BlockEntity into a block that can be part of a fission reactor
  */
-public interface IReactorElement
-{
+public interface IReactorElement {
     /**
      * @return the fission reactor the machine is part of
      */
