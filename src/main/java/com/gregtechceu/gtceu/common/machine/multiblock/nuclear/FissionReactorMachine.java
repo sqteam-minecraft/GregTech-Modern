@@ -22,6 +22,7 @@ import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.content.ContentModifier;
 import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
 import com.gregtechceu.gtceu.api.recipe.logic.OCResult;
+import com.gregtechceu.gtceu.common.block.FuelRod;
 import com.gregtechceu.gtceu.common.capability.EnvironmentalHazardSavedData;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
 import com.gregtechceu.gtceu.common.data.GTRecipeModifiers;
@@ -43,6 +44,7 @@ import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -438,6 +440,12 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
             Set<IReactorElement> elements = blockWorldState.getMatchContext().getOrCreate("reactorElement",
                     Sets::newHashSet);
             BlockState block = blockWorldState.getBlockState();
+            if (block.getBlock() == Blocks.AIR){
+                return true;
+            }
+            if (block.getBlock() == GTBlocks.FUEL_ROD.get()){
+                return true;
+            }
 
 //            if (blockEntity != null) {
 //                var element = GTCapabilityHelper.getReactorElement(blockWorldState.getWorld(),
@@ -446,7 +454,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
 //                    elements.add(element);
 //                }
 //            }
-            return true;
+            return false;
         }, null) {
 
             @Override
