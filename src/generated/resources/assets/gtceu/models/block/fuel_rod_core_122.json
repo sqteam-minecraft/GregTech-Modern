@@ -1,0 +1,10 @@
+{
+  "parent": "gtceu:block/nuclear/fuel_rod_core",
+  "transform": {
+    "translation": [
+      0.5625,
+      0.0,
+      0.75
+    ]
+  }
+}

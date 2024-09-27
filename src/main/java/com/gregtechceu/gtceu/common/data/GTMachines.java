@@ -7,6 +7,7 @@ import com.gregtechceu.gtceu.api.block.MetaMachineBlock;
 import com.gregtechceu.gtceu.api.blockentity.MetaMachineBlockEntity;
 import com.gregtechceu.gtceu.api.capability.IMiner;
 import com.gregtechceu.gtceu.api.capability.compat.FeCompat;
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelConnector;
 import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
@@ -19,6 +20,7 @@ import com.gregtechceu.gtceu.api.data.medicalcondition.MedicalCondition;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.fluids.PropertyFluidFilter;
 import com.gregtechceu.gtceu.api.item.DrumMachineItem;
+import com.gregtechceu.gtceu.api.item.MetaMachineItem;
 import com.gregtechceu.gtceu.api.machine.*;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IRotorHolderMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.*;
@@ -1161,14 +1163,20 @@ public class GTMachines {
             .register();
 
     public static final MachineDefinition REACTOR_FUEL_CONTROLLER = REGISTRATE
-            .machine("reactor_fuel_controller",
-            holder -> new ReactorFuelController(holder, 4))
+            .machine("reactor_fuel_controller", MachineDefinition::createDefinition,
+                    holder -> new ReactorFuelController(holder, 4), ReactorFuelControllerBlock::new,
+                    MetaMachineItem::new, MetaMachineBlockEntity::createBlockEntity)
             .rotationState(RotationState.Y_AXIS)
             .abilities(PartAbility.REACTOR_FUEL_CONTROL)
             .tooltips(Component.translatable("gtceu.universal.disabled"))
             .renderer(() -> new OverlayTieredMachineRenderer(4, GTCEu.id("block/machine/part/reactor_fuel_controller")))
             .compassNodeSelf()
             .register();
+
+    private static class ReactorFuelControllerBlock extends MetaMachineBlock implements IReactorFuelConnector {
+        public ReactorFuelControllerBlock(Properties properties, MachineDefinition definition)
+        { super(properties, definition); }
+    }
 
     public static final MachineDefinition[] DIODE = registerTieredMachines("diode",
             DiodePartMachine::new,

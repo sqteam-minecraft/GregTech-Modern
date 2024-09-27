@@ -21,7 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class ReactorFuelController extends TieredIOPartMachine implements IDistinctPart, IMachineLife, IReactorFuelConnector {
+public class ReactorFuelController extends TieredIOPartMachine implements IDistinctPart, IMachineLife {
 
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ReactorFuelController.class,
             MultiblockPartMachine.MANAGED_FIELD_HOLDER);
