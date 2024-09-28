@@ -4,8 +4,10 @@ import appeng.api.inventories.ItemTransfer;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelConnector;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
+import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
+import com.gregtechceu.gtceu.api.item.TagPrefixItem;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDistinctPart;
@@ -37,6 +39,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.primitives.Ints.*;
+import static com.gregtechceu.gtceu.common.data.GTMaterials.PlutoniumFissionFuel;
+import static com.gregtechceu.gtceu.common.data.GTMaterials.UraniumFissionFuel;
 
 public class ReactorFuelController extends TieredIOPartMachine implements IMachineLife {
 
@@ -54,6 +58,18 @@ public class ReactorFuelController extends TieredIOPartMachine implements IMachi
     public ReactorFuelController(IMachineBlockEntity holder, int tier) {
         super(holder, tier, IO.BOTH);
         this.storage = new ItemStackTransfer();
+        storage.setFilter(stack->{
+            if (stack.getItem() instanceof TagPrefixItem tagPrefix){
+                if(tagPrefix.material.equals(UraniumFissionFuel)){
+                    return true;
+                }
+                if(tagPrefix.material.equals(PlutoniumFissionFuel)){
+                    return true;
+                }
+            }
+
+            return false;
+        });
         this.inventory = createInventory();
     }
 
