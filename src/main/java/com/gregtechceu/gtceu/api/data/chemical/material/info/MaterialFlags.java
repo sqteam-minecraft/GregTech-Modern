@@ -125,6 +125,10 @@ public class MaterialFlags {
             .requireProps(PropertyKey.DUST)
             .build();
 
+    public static final MaterialFlag GENERATE_FUEL_ROD = new MaterialFlag.Builder("generate_fuel_rod")
+            .requireProps(PropertyKey.DUST)
+            .build();
+
     public static final MaterialFlag FORCE_GENERATE_BLOCK = new MaterialFlag.Builder("force_generate_block")
             .requireProps(PropertyKey.DUST)
             .build();

@@ -425,6 +425,39 @@ public class TagPrefix {
             .generationCondition(hasIngotProperty
                     .and(mat -> mat.hasFlag(MaterialFlags.GENERATE_PLATE) && !mat.hasFlag(MaterialFlags.NO_SMASHING)));
 
+    public static final TagPrefix fuelRodSingle = new TagPrefix("fuelRodSingle")
+            .idPattern("single_%s_rod")
+            .defaultTagPath("fuel_rods/single/%s")
+            .unformattedTagPath("fuel_rods/single")
+            .langValue("Single %s Rod")
+            .materialAmount(GTValues.M)
+            .materialIconType(MaterialIconType.fuelRodSingle)
+            .unificationEnabled(true)
+            .generateItem(true)
+            .generationCondition(mat -> mat.hasFlag(MaterialFlags.GENERATE_FUEL_ROD));
+
+    public static final TagPrefix fuelRodDouble = new TagPrefix("fuelRodDouble")
+            .idPattern("double_%s_rod")
+            .defaultTagPath("fuel_rods/double/%s")
+            .unformattedTagPath("fuel_rods/double")
+            .langValue("Double %s Rod")
+            .materialAmount(GTValues.M * 2)
+            .materialIconType(MaterialIconType.fuelRodDouble)
+            .unificationEnabled(true)
+            .generateItem(true)
+            .generationCondition(mat -> mat.hasFlag(MaterialFlags.GENERATE_FUEL_ROD));
+
+    public static final TagPrefix fuelRodQuad = new TagPrefix("fuelRodQuad")
+            .idPattern("quad_%s_rod")
+            .defaultTagPath("fuel_rods/quad/%s")
+            .unformattedTagPath("fuel_rods/quad")
+            .langValue("Quad %s Rod")
+            .materialAmount(GTValues.M * 4)
+            .materialIconType(MaterialIconType.fuelRodQuad)
+            .unificationEnabled(true)
+            .generateItem(true)
+            .generationCondition(mat -> mat.hasFlag(MaterialFlags.GENERATE_FUEL_ROD));
+
     // Regular Plate made of one Ingot/Dust.
     public static final TagPrefix plate = new TagPrefix("plate")
             .defaultTagPath("plates/%s")

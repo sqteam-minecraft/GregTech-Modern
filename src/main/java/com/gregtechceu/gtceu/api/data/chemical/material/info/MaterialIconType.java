@@ -90,6 +90,10 @@ public record MaterialIconType(String name) {
 
     public static final MaterialIconType turbineBlade = new MaterialIconType("turbineBlade");
 
+    public static final MaterialIconType fuelRodSingle = new MaterialIconType("fuelRodSingle");
+    public static final MaterialIconType fuelRodDouble = new MaterialIconType("fuelRodDouble");
+    public static final MaterialIconType fuelRodQuad = new MaterialIconType("fuelRodQuad");
+
     // BLOCK TEXTURES
     public static final MaterialIconType liquid = new MaterialIconType("liquid");
     public static final MaterialIconType gas = new MaterialIconType("gas");
