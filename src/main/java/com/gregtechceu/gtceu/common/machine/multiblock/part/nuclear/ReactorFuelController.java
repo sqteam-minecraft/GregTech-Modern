@@ -1,5 +1,6 @@
 package com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear;
 
+import appeng.api.inventories.ItemTransfer;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelConnector;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
@@ -35,8 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.primitives.Ints.max;
-import static com.google.common.primitives.Ints.min;
+import static com.google.common.primitives.Ints.*;
 
 public class ReactorFuelController extends TieredIOPartMachine implements IMachineLife {
 
@@ -105,24 +105,39 @@ public class ReactorFuelController extends TieredIOPartMachine implements IMachi
             }
         }
 
-        return size;
+        return size*4;
     }
 
     @Override
     public Widget createUIWidget() {
 
-        int height = storage.getSlots();
-        var group = new WidgetGroup(0, 0, 34, 18 * height + 16);
-        var container = new WidgetGroup(4, 4, 26, 18 * height + 8);
+        int width =  8;
+        int height = (storage.getSlots()+4)/width;
+
+        var group = new WidgetGroup(0, 0, 18 * width + 16+8, 18 * height + 16);
+        var containerL = new WidgetGroup(4, 4, 18 * width/2 + 8, 18 * height + 8);
+        var containerR = new WidgetGroup(18 * width/2 + 12, 4, 18 * width/2 + 8, 18 * height + 8);
         int index = 0;
         for (int y = 0; y < height; y++) {
-            container.addWidget(
-                    new SlotWidget(storage, index++, 4, 4 + y * 18, true, io.support(IO.BOTH))
-                            .setBackgroundTexture(GuiTextures.SLOT));
+
+            for(int x = 0; x < width; x++){
+                if (index == storage.getSlots()) break;
+                var slot = new SlotWidget(storage, index++, 4 + (x%4) * 18, 4 + y * 18, true, io.support(IO.BOTH))
+                        .setBackgroundTexture(GuiTextures.SLOT);
+                if (x < 4){
+                    containerL.addWidget(slot);
+                }else {
+                    containerR.addWidget(slot);
+                }
+
+            }
+
         }
 
-        container.setBackground(GuiTextures.BACKGROUND_INVERSE);
-        group.addWidget(container);
+        containerL.setBackground(GuiTextures.BACKGROUND_INVERSE);
+        containerR.setBackground(GuiTextures.BACKGROUND_INVERSE);
+        group.addWidget(containerL);
+        group.addWidget(containerR);
 
         return group;
     }
