@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 /**
  * This is some kind of Periodic Table, which can be used to determine "Properties" of the Materials.
  */
@@ -33,7 +35,7 @@ public class Element {
      */
     @Getter
     @Setter
-    private String decayTo;
+    private List<Element> decayTo;
     /**
      * Name of the Element
      */
@@ -57,7 +59,7 @@ public class Element {
         return protons + neutrons;
     }
 
-    public Element(long protons, long neutrons, long halfLifeSeconds, String decayTo, String name, String symbol,
+    public Element(long protons, long neutrons, long halfLifeSeconds, List<Element> decayTo, String name, String symbol,
                    boolean isIsotope) {
         this.protons = protons;
         this.neutrons = neutrons;

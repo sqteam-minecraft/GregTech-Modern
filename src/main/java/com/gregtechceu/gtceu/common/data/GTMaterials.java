@@ -2,6 +2,7 @@ package com.gregtechceu.gtceu.common.data;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.GTCEuAPI;
+import com.gregtechceu.gtceu.api.data.chemical.Element;
 import com.gregtechceu.gtceu.api.data.chemical.material.MarkerMaterial;
 import com.gregtechceu.gtceu.api.data.chemical.material.MarkerMaterials;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
@@ -9,6 +10,7 @@ import com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialFlag;
 import com.gregtechceu.gtceu.api.data.chemical.material.stack.MaterialStack;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.common.data.materials.*;
+import com.gregtechceu.gtceu.common.unification.material.MaterialRegistryManager;
 import com.gregtechceu.gtceu.utils.SupplierMemoizer;
 
 import net.minecraft.world.item.Items;
@@ -17,9 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialFlags.*;
 import static com.gregtechceu.gtceu.api.data.tag.TagPrefix.*;
@@ -275,6 +275,39 @@ public class GTMaterials {
         return GTCEuAPI.materialManager.getMaterial(name);
     }
 
+    public static List<Material> getDecayMaterials(Material material) throws IllegalArgumentException {
+        if (material.getElement() == null || material.getElement().decayTo().isEmpty())
+            throw new IllegalArgumentException("Material does not decay");
+
+        List<Element> decayElements = material.getElement().decayTo();
+        Collection<Material> registeredMaterials = MaterialRegistryManager.getInstance().getRegisteredMaterials();
+
+        List<Material> decayMaterials = new ArrayList<>();
+        decayElements.forEach(e -> {
+            Material decayMaterial = null;
+            for (Material m : registeredMaterials) {
+                if (m.getElement() != null && m.getElement().equals(e)) {
+                    if (m.getMaterialComponents() == material.getMaterialComponents()) {
+                        decayMaterial = m;
+                        break;
+                    }
+                }
+            }
+            if (decayMaterial == null) {
+                for (Material m : registeredMaterials) {
+                    if (m.getElement() != null && m.getElement().equals(e)) {
+                        if (m.getMaterialComponents() == null) {
+                            decayMaterial = m;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (decayMaterial != null) decayMaterials.add(decayMaterial);
+        });
+        return decayMaterials;
+    }
+
     private static void excludeAllGems(Material material, ItemLike... items) {
         gem.setIgnored(material, items);
         excludeAllGemsButNormal(material);
@@ -392,6 +425,7 @@ public class GTMaterials {
     public static Material Praseodymium;
     public static Material Promethium;
     public static Material Protactinium;
+    public static Material Protactinium233;
     public static Material Radon;
     public static Material Radium;
     public static Material Rhenium;
@@ -423,6 +457,7 @@ public class GTMaterials {
     public static Material Tungsten;
     public static Material Uranium238;
     public static Material Uranium235;
+    public static Material Uranium233;
     public static Material Vanadium;
     public static Material Xenon;
     public static Material Ytterbium;
@@ -605,6 +640,7 @@ public class GTMaterials {
     public static Material Iron2Chloride;
     public static Material UraniumHexafluoride;
     public static Material EnrichedUraniumHexafluoride;
+    public static Material Uranium233Hexafluoride;
     public static Material DepletedUraniumHexafluoride;
     public static Material UraniumFissionFuel;
     public static Material ThoriumFissionFuel;

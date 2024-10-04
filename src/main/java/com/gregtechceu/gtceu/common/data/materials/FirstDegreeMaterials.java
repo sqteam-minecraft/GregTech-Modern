@@ -1236,6 +1236,13 @@ public class FirstDegreeMaterials {
                 .components(Plutonium239, 1, Oxygen, 2)
                 .buildAndRegister();
 
+        ThoriumFissionFuel = new Material.Builder(GTCEu.id("thorium_fission_fuel"))
+                .dust()
+                .color(0x1A1A1A).secondaryColor(0xFEFEFE)
+                .flags(DISABLE_DECOMPOSITION, GENERATE_FUEL_ROD)
+                .components(Thorium, 1, Oxygen, 4)
+                .buildAndRegister();
+
         NitrousOxide = new Material.Builder(GTCEu.id("nitrous_oxide"))
                 .gas()
                 .color(0x7DC8FF)

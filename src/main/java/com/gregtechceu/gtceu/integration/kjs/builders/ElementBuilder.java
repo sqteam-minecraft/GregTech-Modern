@@ -6,10 +6,13 @@ import com.gregtechceu.gtceu.common.data.GTElements;
 
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
+
 public class ElementBuilder extends BuilderBase<Element> {
 
     public transient long protons, neutrons, halfLifeSeconds;
-    public transient String decayTo, name, symbol;
+    public transient String name, symbol;
+    public List<Element> decayTo;
     public transient boolean isIsotope;
 
     public ElementBuilder(ResourceLocation i, Object... args) {
@@ -18,7 +21,7 @@ public class ElementBuilder extends BuilderBase<Element> {
         protons = args[0] instanceof Number number ? number.intValue() : Double.valueOf(args[0].toString()).intValue();
         neutrons = ((Number) args[1]).intValue();
         halfLifeSeconds = ((Number) args[2]).intValue();
-        decayTo = args[3] == null ? null : args[3].toString();
+        decayTo = args[3] == null ? null : (List<Element>) args[3];
         name = i.getPath();
         symbol = args[4] == null ? "" : args[4].toString();
         isIsotope = (Boolean) args[5];

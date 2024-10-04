@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.item.TagPrefixItem;
 import com.gregtechceu.gtceu.data.pack.GTDynamicResourcePack;
 import com.gregtechceu.gtceu.utils.GradientUtil;
 
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.models.model.DelegatedModel;
@@ -29,6 +30,7 @@ import static com.gregtechceu.gtceu.client.renderer.block.MaterialBlockRenderer.
  */
 public class TagPrefixItemRenderer {
 
+    @Getter
     private static final Set<TagPrefixItemRenderer> MODELS = new HashSet<>();
 
     public static void create(Item item, MaterialIconType type, MaterialIconSet iconSet) {
@@ -94,8 +96,11 @@ public class TagPrefixItemRenderer {
         }
     }
 
+    @Getter
     private final Item item;
+    @Getter
     private final MaterialIconType type;
+    @Getter
     private final MaterialIconSet iconSet;
 
     private TagPrefixItemRenderer(Item item, MaterialIconType type, MaterialIconSet iconSet) {
