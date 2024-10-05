@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.api.item;
 
 import com.gregtechceu.gtceu.api.GTValues;
+import com.gregtechceu.gtceu.api.data.chemical.Element;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.DustProperty;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
@@ -11,10 +12,12 @@ import com.gregtechceu.gtceu.client.renderer.item.TagPrefixItemRenderer;
 import com.gregtechceu.gtceu.common.data.GTDamageTypes;
 
 import com.gregtechceu.gtceu.common.data.GTMaterials;
+import com.gregtechceu.gtceu.utils.GradientUtil;
 import com.lowdragmc.lowdraglib.Platform;
 
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.network.chat.Component;
@@ -32,6 +35,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -71,6 +75,23 @@ public class TagPrefixItem extends Item implements IItemRendererProvider
     public static ItemColor tintColor() {
         return (itemStack, index) -> {
             if (itemStack.getItem() instanceof TagPrefixItem prefixItem) {
+                if (itemStack.getOrCreateTag().contains("DecayTime")) {
+                    List<Material> decayMaterials = GTMaterials.getDecayMaterials(prefixItem.material);
+                    ItemEntry<TagPrefixItem> targetItems;
+
+                    if (!decayMaterials.isEmpty()) {
+                        Material decayMaterial = decayMaterials.get(0);
+                        targetItems = MATERIAL_ITEMS.get(prefixItem.tagPrefix, decayMaterial);
+                        if (targetItems == null) return 0xFFFFFFFF;
+                    } else return 0xFFFFFFFF;
+
+                    Element element = prefixItem.material.getElement();
+                    if (element == null) return 0xFFFFFFFF;
+
+                    int time = itemStack.getOrCreateTag().getInt("DecayTime");
+                    long timeToDecay = element.halfLifeSeconds();
+                    return GradientUtil.blend(prefixItem.material.getLayerARGB(0), targetItems.get().material.getMaterialARGB(), (float) time / timeToDecay);
+                }
                 return prefixItem.material.getLayerARGB(index);
             }
             return -1;
@@ -128,16 +149,17 @@ public class TagPrefixItem extends Item implements IItemRendererProvider
 
                         if (decayTime >= timeToDecay) {
                             List<Material> decayMaterials = GTMaterials.getDecayMaterials(material);
-                            if (decayMaterials.isEmpty()) {
-                                stack.setCount(0);
-                            } else {
-                                Material decayMaterial = decayMaterials.get(level.random.nextInt(decayMaterials.size()));
-                                var targetItem = MATERIAL_ITEMS.get(tagPrefix, decayMaterial);
-                                ItemStack decayStack = ItemStack.EMPTY;
-                                if (targetItem != null) decayStack = targetItem.get().getDefaultInstance();
-                                decayStack.setCount(stack.getCount());
-                                stack.setCount(0);
-                                player.addItem(decayStack);
+                            stack.setCount(0);
+                            if (!decayMaterials.isEmpty()) {
+                                decayMaterials.forEach(decayMaterial -> {
+                                    var targetItem = MATERIAL_ITEMS.get(tagPrefix, decayMaterial);
+
+                                    ItemStack decayStack = ItemStack.EMPTY;
+                                    if (targetItem != null) decayStack = targetItem.get().getDefaultInstance();
+
+                                    decayStack.setCount(stack.getCount());
+                                    player.addItem(decayStack);
+                                });
                             }
                         } else {
                             stack.getOrCreateTag().putInt("DecayTime", decayTime);
@@ -173,9 +195,13 @@ public class TagPrefixItem extends Item implements IItemRendererProvider
     @Override
     public IRenderer getRenderer(ItemStack stack)
     {
-        disabled.set(true);
+
+        boolean isDecayable = material.getElement()!=null && material.getElement().halfLifeSeconds() != -1;
+        if(isDecayable){
+            return decayableItemRenderer;
+        }
         return null;
-        //boolean isDecayable = material.getElement()!=null && material.getElement().halfLifeSeconds() != -1;
+        //
         //disabled.set(!isDecayable);
         //if(isDecayable)
         //    return decayableItemRenderer;

@@ -64,7 +64,7 @@ public class Element {
         this.protons = protons;
         this.neutrons = neutrons;
         this.halfLifeSeconds = halfLifeSeconds;
-        this.decayTo = decayTo;
+        this.decayTo = decayTo!=null?decayTo:List.of();
         this.name = name;
         this.symbol = symbol;
         this.isIsotope = isIsotope;

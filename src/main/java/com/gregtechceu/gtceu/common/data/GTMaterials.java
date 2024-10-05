@@ -277,7 +277,8 @@ public class GTMaterials {
 
     public static List<Material> getDecayMaterials(Material material) throws IllegalArgumentException {
         if (material.getElement() == null || material.getElement().decayTo().isEmpty())
-            throw new IllegalArgumentException("Material does not decay");
+            return List.of();
+            //throw new IllegalArgumentException("Material does not decay");
 
         List<Element> decayElements = material.getElement().decayTo();
         Collection<Material> registeredMaterials = MaterialRegistryManager.getInstance().getRegisteredMaterials();

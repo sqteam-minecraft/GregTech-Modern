@@ -1,43 +1,46 @@
 package com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear;
 
-import appeng.api.inventories.ItemTransfer;
-import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelConnector;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
+import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
-import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
+import com.gregtechceu.gtceu.api.item.TagPrefixItem;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
+import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
-import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDistinctPart;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
-import com.gregtechceu.gtceu.api.machine.multiblock.part.MultiblockPartMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.TieredIOPartMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.TieredPartMachine;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
+import com.gregtechceu.gtceu.common.block.FuelRod;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
-import com.lowdragmc.lowdraglib.syncdata.annotation.UpdateListener;
+import com.lowdragmc.lowdraglib.syncdata.annotation.RPCMethod;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import lombok.Getter;
-import lombok.Setter;
-import net.minecraft.client.Minecraft;
+import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.google.common.primitives.Ints.*;
+import static com.gregtechceu.gtceu.common.data.GTMaterials.PlutoniumFissionFuel;
+import static com.gregtechceu.gtceu.common.data.GTMaterials.UraniumFissionFuel;
 
+@Slf4j
 public class ReactorFuelController extends TieredIOPartMachine implements IMachineLife {
 
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ReactorFuelController.class,
@@ -51,10 +54,92 @@ public class ReactorFuelController extends TieredIOPartMachine implements IMachi
     @DescSynced
     public final ItemStackTransfer storage;
 
+    private int[] fuelRods;
+    public boolean needUpdate = false;
+    private TickableSubscription subscription;
+
     public ReactorFuelController(IMachineBlockEntity holder, int tier) {
         super(holder, tier, IO.BOTH);
         this.storage = new ItemStackTransfer();
+        storage.setFilter(stack->{
+            if (stack.getItem() instanceof TagPrefixItem tagPrefix){
+                if(tagPrefix.material.equals(UraniumFissionFuel)){
+                    return true;
+                }
+                if(tagPrefix.material.equals(PlutoniumFissionFuel)){
+                    return true;
+                }
+            }
+
+            return false;
+        });
         this.inventory = createInventory();
+        inventory.addChangedListener(()->{
+//            try {
+                Level levelr = getLevel();
+                if (levelr == null) return;
+                if (levelr.isClientSide) return;
+                ServerLevel level = (ServerLevel) levelr;
+                fuelRods = new int[storage.getSlots()/4];
+                for (int rod = 0; rod < storage.getSlots()/4; rod++) {
+                    var blockPos = getPos().relative(Direction.Axis.Y, -rod - 1);
+                    var rodState = level.getBlockState(blockPos);
+                    int rodsState = rodState.getValue(FuelRod.RODS);
+                    for (int pos = 0; pos < 4; pos++) {
+                        var item = storage.getStackInSlot(rod * 4 + pos);
+                        int rodsAmount = getRodsAmount(item);
+                        rodsState &= ~(0b11 << pos * 2);
+                        rodsState |= rodsAmount << pos * 2;
+                    }
+                    fuelRods[rod] = rodsState;
+                }
+                needUpdate = true;
+        });
+    }
+
+    private static int getRodsAmount(ItemStack item) {
+        int rodsAmount = 0;
+        if (item.getItem() instanceof TagPrefixItem prefixItem){
+            if (prefixItem.tagPrefix == TagPrefix.fuelRodSingle){
+                rodsAmount = 1;
+            }else if (prefixItem.tagPrefix == TagPrefix.fuelRodDouble){
+                rodsAmount = 2;
+            }
+            else if (prefixItem.tagPrefix == TagPrefix.fuelRodQuad){
+                rodsAmount = 3;
+            }
+        }
+        return rodsAmount;
+    }
+
+    @Override
+    public void onLoad() {
+        if (getLevel() instanceof ServerLevel serverLevel) {
+            serverLevel.getServer().tell(new TickTask(0, ()->{
+                if (subscription == null) {
+                    subscription = subscribeServerTick(null, this::updateFuelRods);
+                } else {
+                    subscription.unsubscribe();
+                    subscription = null;
+                }
+            }));
+        }
+        super.onLoad();
+    }
+
+    public void updateFuelRods() {
+        if (getLevel() instanceof ServerLevel level && needUpdate && fuelRods!=null) {
+            for (int i = 0; i < fuelRods.length; i++) {
+                var blockPos = getPos().relative(Direction.Axis.Y, -i - 1);
+                var rodState = level.getBlockState(blockPos);
+                try {
+                    level.setBlock(blockPos, rodState.setValue(FuelRod.RODS, fuelRods[i]), 2);
+                }catch (Exception e) {
+                    log.error("error", e);
+                }
+
+            }
+        }
     }
 
     @Override
@@ -122,7 +207,7 @@ public class ReactorFuelController extends TieredIOPartMachine implements IMachi
 
             for(int x = 0; x < width; x++){
                 if (index == storage.getSlots()) break;
-                var slot = new SlotWidget(storage, index++, 4 + (x%4) * 18, 4 + y * 18, true, io.support(IO.BOTH))
+                var slot = new SlotWidget(inventory.storage, index++, 4 + (x%4) * 18, 4 + y * 18, true, io.support(IO.BOTH))
                         .setBackgroundTexture(GuiTextures.SLOT);
                 if (x < 4){
                     containerL.addWidget(slot);
@@ -142,7 +227,5 @@ public class ReactorFuelController extends TieredIOPartMachine implements IMachi
         return group;
     }
 
-    public void updateFuelRods() {
 
-    }
 }
