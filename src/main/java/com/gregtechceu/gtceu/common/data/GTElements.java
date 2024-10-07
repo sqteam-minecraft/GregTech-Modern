@@ -116,7 +116,7 @@ public class GTElements {
     public static final Element U238 = createAndRegister(92, 146, -1, null, "Uranium-238", "U-238", false);
     public static final Element U235 = createAndRegister(92, 143, -1, null, "Uranium-235", "U-235", true);
     public static final Element U233 = createAndRegister(92, 141, -1, null, "Uranium-233", "U-233", true);
-    public static final Element Pa233 = createAndRegister(91, 142, 5/*2330000*/, List.of(U233), "Protactinium-233", "Pa-233", true);
+    public static final Element Pa233 = createAndRegister(91, 142, 48540, List.of(U233), "Protactinium-233", "Pa-233", true);
     public static final Element Np = createAndRegister(93, 144, -1, null, "Neptunium", "Np", false);
     public static final Element Pu = createAndRegister(94, 152, -1, null, "Plutonium", "Pu", false);
     public static final Element Pu239 = createAndRegister(94, 145, -1, null, "Plutonium-239", "Pu-239", false);

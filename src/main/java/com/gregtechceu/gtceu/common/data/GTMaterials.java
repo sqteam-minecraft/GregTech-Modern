@@ -275,37 +275,66 @@ public class GTMaterials {
         return GTCEuAPI.materialManager.getMaterial(name);
     }
 
-    public static List<Material> getDecayMaterials(Material material) throws IllegalArgumentException {
-        if (material.getElement() == null || material.getElement().decayTo().isEmpty())
-            return List.of();
-            //throw new IllegalArgumentException("Material does not decay");
+    public static Map.Entry<Element, Long> getDecayableElement(Material material) {
+        Map.Entry<Element, Long> decayElement = null;
 
-        List<Element> decayElements = material.getElement().decayTo();
+        if (material.getElement() == null) {
+            for (var component : material.getMaterialComponents()) {
+                if (component.material().getElement() != null && component.material().getElement().halfLifeSeconds() != -1) {
+                    decayElement = Map.entry(component.material().getElement(), component.amount());
+                    break;
+                }
+            }
+        } else if (material.getElement().halfLifeSeconds() != -1)
+            decayElement = Map.entry(material.getElement(), 1L);
+
+        return decayElement;
+    }
+
+    public static List<Material> getDecayMaterials(Material material) {
         Collection<Material> registeredMaterials = MaterialRegistryManager.getInstance().getRegisteredMaterials();
-
         List<Material> decayMaterials = new ArrayList<>();
+
+        Map.Entry<Element, Long> decayableElement = GTMaterials.getDecayableElement(material);
+        if (decayableElement == null) return List.of();
+
+        List<Element> decayElements = decayableElement.getKey().decayTo();
+
+        if (decayElements.isEmpty()) return List.of();
+
         decayElements.forEach(e -> {
             Material decayMaterial = null;
-            for (Material m : registeredMaterials) {
-                if (m.getElement() != null && m.getElement().equals(e)) {
-                    if (m.getMaterialComponents() == material.getMaterialComponents()) {
+
+            if (material.getElement() == null) {
+                List<MaterialStack> requiredSecondaryComponents = material.getMaterialComponents().stream()
+                        .filter(c -> c.material().getElement() != decayableElement.getKey()).toList();
+
+                for (Material m : registeredMaterials) {
+                    Set<MaterialStack> components = new HashSet<>(m.getMaterialComponents());
+                    List<MaterialStack> secondaryComponents = m.getMaterialComponents().stream()
+                            .filter(c -> c.material().getElement() != e).toList();
+
+                    Set<MaterialStack> leftoverComponents = new HashSet<>(components);
+                    requiredSecondaryComponents.forEach(leftoverComponents::remove);
+
+                    if (components.containsAll(secondaryComponents) && leftoverComponents.size() == 1 &&
+                            leftoverComponents.removeIf(c -> c.material().getElement() == e && c.amount() == decayableElement.getValue())) {
                         decayMaterial = m;
                         break;
                     }
                 }
             }
-            if (decayMaterial == null) {
-                for (Material m : registeredMaterials) {
-                    if (m.getElement() != null && m.getElement().equals(e)) {
-                        if (m.getMaterialComponents() == null) {
-                            decayMaterial = m;
-                            break;
-                        }
-                    }
+
+            for (Material m : registeredMaterials) {
+                if (m.getElement() != null && m.getElement().equals(e) && m.getMaterialComponents().isEmpty()) {
+                    decayMaterial = m;
+                    break;
                 }
             }
+
             if (decayMaterial != null) decayMaterials.add(decayMaterial);
         });
+
         return decayMaterials;
     }
 
@@ -641,7 +670,6 @@ public class GTMaterials {
     public static Material Iron2Chloride;
     public static Material UraniumHexafluoride;
     public static Material EnrichedUraniumHexafluoride;
-    public static Material Uranium233Hexafluoride;
     public static Material DepletedUraniumHexafluoride;
     public static Material UraniumFissionFuel;
     public static Material ThoriumFissionFuel;

@@ -60,21 +60,6 @@ public class GuiGraphicsMixin {
         }
     }
 
-//    @Redirect(
-//            method = "renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;IIII)V",
-//            at = @At(
-//                     value = "INVOKE",
-//                     target = "Lnet/minecraft/client/renderer/entity/ItemRenderer;render(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/client/resources/model/BakedModel;)V")
-//    )
-//    private void gtceu$renderDecayableItem(ItemRenderer instance, ItemStack itemStack, ItemDisplayContext displayContext,
-//                                           boolean leftHand, PoseStack poseStack, MultiBufferSource buffer,
-//                                           int combinedLight, int combinedOverlay, BakedModel p_model) {
-//        GuiGraphics self = (GuiGraphics) (Object) this;
-//        if (!(itemStack.getItem() instanceof TagPrefixItem prefixItem) || !itemStack.getOrCreateTag().contains("DecayTime")) {
-//            instance.render(itemStack, displayContext, leftHand, poseStack, buffer, combinedLight, combinedOverlay, p_model);
-//        }
-//    }
-
     @Inject(method = "renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;IIII)V",
             at = @At(value = "HEAD"),
             cancellable = true)
@@ -83,9 +68,6 @@ public class GuiGraphicsMixin {
         if (GTCEU$OVERRIDING_FOR.get() != null) {
             return;
         }
-        //if (stack.getItem() instanceof TagPrefixItem prefixItem) {
-        //    DecayableItemRenderer.render((GuiGraphics) (Object) this, livingEntity, level, stack, x, y, seed);
-        //}
 
         Pair<GTRecipeType, String> researchData = ResearchManager.readResearchId(stack);
         if (Screen.hasShiftDown() && researchData != null) {
