@@ -2,6 +2,7 @@ package com.gregtechceu.gtceu.common.data;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.GTCEuAPI;
+import com.gregtechceu.gtceu.api.data.chemical.Element;
 import com.gregtechceu.gtceu.api.data.chemical.material.MarkerMaterial;
 import com.gregtechceu.gtceu.api.data.chemical.material.MarkerMaterials;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
@@ -9,6 +10,7 @@ import com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialFlag;
 import com.gregtechceu.gtceu.api.data.chemical.material.stack.MaterialStack;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.common.data.materials.*;
+import com.gregtechceu.gtceu.common.unification.material.MaterialRegistryManager;
 import com.gregtechceu.gtceu.utils.SupplierMemoizer;
 
 import net.minecraft.world.item.Items;
@@ -17,9 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialFlags.*;
 import static com.gregtechceu.gtceu.api.data.tag.TagPrefix.*;
@@ -275,6 +275,69 @@ public class GTMaterials {
         return GTCEuAPI.materialManager.getMaterial(name);
     }
 
+    public static Map.Entry<Element, Long> getDecayableElement(Material material) {
+        Map.Entry<Element, Long> decayElement = null;
+
+        if (material.getElement() == null) {
+            for (var component : material.getMaterialComponents()) {
+                if (component.material().getElement() != null && component.material().getElement().halfLifeSeconds() != -1) {
+                    decayElement = Map.entry(component.material().getElement(), component.amount());
+                    break;
+                }
+            }
+        } else if (material.getElement().halfLifeSeconds() != -1)
+            decayElement = Map.entry(material.getElement(), 1L);
+
+        return decayElement;
+    }
+
+    public static List<Material> getDecayMaterials(Material material) {
+        Collection<Material> registeredMaterials = MaterialRegistryManager.getInstance().getRegisteredMaterials();
+        List<Material> decayMaterials = new ArrayList<>();
+
+        Map.Entry<Element, Long> decayableElement = GTMaterials.getDecayableElement(material);
+        if (decayableElement == null) return List.of();
+
+        List<Element> decayElements = decayableElement.getKey().decayTo();
+
+        if (decayElements.isEmpty()) return List.of();
+
+        decayElements.forEach(e -> {
+            Material decayMaterial = null;
+
+            if (material.getElement() == null) {
+                List<MaterialStack> requiredSecondaryComponents = material.getMaterialComponents().stream()
+                        .filter(c -> c.material().getElement() != decayableElement.getKey()).toList();
+
+                for (Material m : registeredMaterials) {
+                    Set<MaterialStack> components = new HashSet<>(m.getMaterialComponents());
+                    List<MaterialStack> secondaryComponents = m.getMaterialComponents().stream()
+                            .filter(c -> c.material().getElement() != e).toList();
+
+                    Set<MaterialStack> leftoverComponents = new HashSet<>(components);
+                    requiredSecondaryComponents.forEach(leftoverComponents::remove);
+
+                    if (components.containsAll(secondaryComponents) && leftoverComponents.size() == 1 &&
+                            leftoverComponents.removeIf(c -> c.material().getElement() == e && c.amount() == decayableElement.getValue())) {
+                        decayMaterial = m;
+                        break;
+                    }
+                }
+            }
+
+            for (Material m : registeredMaterials) {
+                if (m.getElement() != null && m.getElement().equals(e) && m.getMaterialComponents().isEmpty()) {
+                    decayMaterial = m;
+                    break;
+                }
+            }
+
+            if (decayMaterial != null) decayMaterials.add(decayMaterial);
+        });
+
+        return decayMaterials;
+    }
+
     private static void excludeAllGems(Material material, ItemLike... items) {
         gem.setIgnored(material, items);
         excludeAllGemsButNormal(material);
@@ -392,6 +455,7 @@ public class GTMaterials {
     public static Material Praseodymium;
     public static Material Promethium;
     public static Material Protactinium;
+    public static Material Protactinium233;
     public static Material Radon;
     public static Material Radium;
     public static Material Rhenium;
@@ -423,6 +487,7 @@ public class GTMaterials {
     public static Material Tungsten;
     public static Material Uranium238;
     public static Material Uranium235;
+    public static Material Uranium233;
     public static Material Vanadium;
     public static Material Xenon;
     public static Material Ytterbium;
