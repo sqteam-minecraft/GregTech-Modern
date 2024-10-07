@@ -317,47 +317,6 @@ public class GTModels {
                     }
                 }
             });
-
-
-
-            //return builder.part().build();
-
-
-            //prov.getVariantBuilder(ctx.getEntry())
-            //        .partialState().with(FuelRod.V_LINK, FuelRod.VLinkTypes.UP)
-            //        .modelForState().modelFile(model)
-            //        .nextModel().modelFile(modelLinkUp).addModel()
-            //        .partialState().with(FuelRod.V_LINK, FuelRod.VLinkTypes.DOWN)
-            //        .modelForState().modelFile(model)
-            //        .nextModel().modelFile(modelLinkDown).addModel()
-            //        .partialState().with(FuelRod.V_LINK, FuelRod.VLinkTypes.BOTH)
-            //        .modelForState().modelFile(model)
-            //        .nextModel().modelFile(modelLinkUp)
-            //        .nextModel().modelFile(modelLinkDown).addModel()
-            //        .partialState().with(FuelRod.V_LINK, FuelRod.VLinkTypes.NONE)
-            //        .modelForState().modelFile(model).addModel();
-
-            /*prov.getVariantBuilder(ctx.getEntry()).forAllStates(state -> {
-
-
-                var builder = ConfiguredModel.builder()
-                        .modelFile(model);
-
-
-
-                //return prov.getMultipartBuilder(ctx.getEntry()).part().modelFile(model).nextModel().modelFile(modelLinkUp).build();
-
-
-//                return (switch (state.getValue(FuelRod.V_LINK)) {
-//                    case UP ->   builder.nextModel().modelFile(modelLinkUp);
-//                    case DOWN -> builder.nextModel().modelFile(modelLinkDown);
-//                    case BOTH -> builder.nextModel().modelFile(modelLinkDown).nextModel().modelFile(modelLinkUp);
-//                    case NONE -> builder;
-//                }).build();
-                //if (blockState.getValue())
-                //if (ctx.getEntry().getFissionReactor()!=null)
-
-            });*/
         };
     }
 

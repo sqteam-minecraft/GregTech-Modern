@@ -10,6 +10,8 @@ import com.gregtechceu.gtceu.integration.kjs.GTRegistryInfo;
 
 import net.minecraftforge.fml.ModLoader;
 
+import java.util.List;
+
 public class GTElements {
 
     static {
@@ -17,10 +19,10 @@ public class GTElements {
     }
 
     public static final Element H = createAndRegister(1, 0, -1, null, "Hydrogen", "H", false);
-    public static final Element D = createAndRegister(1, 1, -1, "H", "Deuterium", "D", true);
-    public static final Element T = createAndRegister(1, 2, -1, "D", "Tritium", "T", true);
+    public static final Element D = createAndRegister(1, 1, -1, List.of(H), "Deuterium", "D", true);
+    public static final Element T = createAndRegister(1, 2, -1, List.of(D), "Tritium", "T", true);
     public static final Element He = createAndRegister(2, 2, -1, null, "Helium", "He", false);
-    public static final Element He3 = createAndRegister(2, 1, -1, "H&D", "Helium-3", "He-3", true);
+    public static final Element He3 = createAndRegister(2, 1, -1, List.of(H, D), "Helium-3", "He-3", true);
     public static final Element Li = createAndRegister(3, 4, -1, null, "Lithium", "Li", false);
     public static final Element Be = createAndRegister(4, 5, -1, null, "Beryllium", "Be", false);
     public static final Element B = createAndRegister(5, 5, -1, null, "Boron", "B", false);
@@ -113,6 +115,8 @@ public class GTElements {
     public static final Element U = createAndRegister(92, 146, -1, null, "Uranium", "U", false);
     public static final Element U238 = createAndRegister(92, 146, -1, null, "Uranium-238", "U-238", false);
     public static final Element U235 = createAndRegister(92, 143, -1, null, "Uranium-235", "U-235", true);
+    public static final Element U233 = createAndRegister(92, 141, -1, null, "Uranium-233", "U-233", true);
+    public static final Element Pa233 = createAndRegister(91, 142, 48540, List.of(U233), "Protactinium-233", "Pa-233", true);
     public static final Element Np = createAndRegister(93, 144, -1, null, "Neptunium", "Np", false);
     public static final Element Pu = createAndRegister(94, 152, -1, null, "Plutonium", "Pu", false);
     public static final Element Pu239 = createAndRegister(94, 145, -1, null, "Plutonium-239", "Pu-239", false);
@@ -151,7 +155,7 @@ public class GTElements {
     public static final Element Sp = createAndRegister(1, 0, -1, null, "Space", "Sp", false);
     public static final Element Ma = createAndRegister(1, 0, -1, null, "Magic", "Ma", false);
 
-    public static Element createAndRegister(long protons, long neutrons, long halfLifeSeconds, String decayTo,
+    public static Element createAndRegister(long protons, long neutrons, long halfLifeSeconds, List<Element> decayTo,
                                             String name, String symbol, boolean isIsotope) {
         Element element = new Element(protons, neutrons, halfLifeSeconds, decayTo, name, symbol, isIsotope);
         GTRegistries.ELEMENTS.register(name, element);

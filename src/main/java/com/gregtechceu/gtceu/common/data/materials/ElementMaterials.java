@@ -663,6 +663,13 @@ public class ElementMaterials {
                 // .radioactiveHazard(1)
                 .buildAndRegister();
 
+        Protactinium233 = new Material.Builder(GTCEu.id("protactinium_233"))
+                .dust()
+                .color(0xF7AA36).iconSet(RADIOACTIVE)
+                .element(GTElements.Pa233)
+                .radioactiveHazard(5)
+                .buildAndRegister();
+
         Radon = new Material.Builder(GTCEu.id("radon"))
                 .gas()
                 .color(0xFF39FF)
@@ -885,6 +892,14 @@ public class ElementMaterials {
                 .color(0x46FA46).secondaryColor(0x33342c).iconSet(RADIOACTIVE)
                 .appendFlags(EXT_METAL)
                 .element(GTElements.U235)
+                .radioactiveHazard(1)
+                .buildAndRegister();
+
+        Uranium233 = new Material.Builder(GTCEu.id("uranium_233"))
+                .dust()
+                .color(0x7cf55b).secondaryColor(0x33342c).iconSet(RADIOACTIVE)
+                .appendFlags(EXT_METAL)
+                .element(GTElements.U233)
                 .radioactiveHazard(1)
                 .buildAndRegister();
 
