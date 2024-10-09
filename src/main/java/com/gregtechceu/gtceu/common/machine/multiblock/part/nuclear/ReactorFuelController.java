@@ -57,8 +57,12 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
     public final ItemStackTransfer storage;
 
     private int[] fuelRods;
-    public boolean needUpdate = false;
+    private boolean needUpdate = false;
     private TickableSubscription subscription;
+
+    public boolean isEmpty() {
+        return inventory.isEmpty();
+    }
 
     public ReactorFuelController(IMachineBlockEntity holder, int tier) {
         super(holder, tier, IO.BOTH);
@@ -66,12 +70,13 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
         this.storage = new ItemStackTransfer();
         storage.setFilter(stack -> {
             if (stack.getItem() instanceof TagPrefixItem tagPrefix && reactor != null) {
+                reactor.updateFuel();
                 ReactorFuel fuel = reactor.getFuel();
                 if (fuel == null) {
                     reactor.setFuel(Arrays.stream(ReactorFuel.values()).filter(f -> f.getFuel().equals(tagPrefix.material))
                             .findFirst().orElse(null));
                     needUpdate = true;
-                    return reactor.getFuel() != null;
+                    return true;
                 };
                 return fuel.getFuel().equals(tagPrefix.material);
             }
@@ -80,9 +85,7 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
 
         this.inventory = createInventory();
         inventory.addChangedListener(() -> {
-                ServerLevel level = (ServerLevel) getLevel();
-                if (level == null) return;
-
+            if (getLevel() instanceof ServerLevel level) {
                 fuelRods = new int[storage.getSlots() / 4];
                 for (int rod = 0; rod < storage.getSlots() / 4; rod++) {
                     var blockPos = getPos().relative(Direction.Axis.Y, -rod - 1);
@@ -96,6 +99,7 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
                     fuelRods[rod] = fuelRodState;
                 }
                 needUpdate = true;
+            }
         });
     }
 
@@ -125,12 +129,17 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
 
     public void updateFuelRods() {
         if (getLevel() instanceof ServerLevel level && needUpdate && fuelRods != null) {
+            ReactorFuel fuelType = ReactorFuel.URANIUM;
+            if (reactor != null && reactor.getFuel() != null) fuelType = reactor.getFuel();
+
             for (int i = 0; i < fuelRods.length; i++) {
                 var blockPos = getPos().relative(Direction.Axis.Y, -i - 1);
                 var rodState = level.getBlockState(blockPos);
                 level.setBlock(blockPos, rodState.setValue(FuelRod.RODS, fuelRods[i])
-                        .setValue(FuelRod.FUEL_TYPE, reactor.getFuel() == null ? ReactorFuel.URANIUM : reactor.getFuel()), 2);
+                        .setValue(FuelRod.FUEL_TYPE, fuelType), 2);
             }
+
+            needUpdate = false;
         }
     }
 
@@ -152,6 +161,7 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
     public void addedToController(@NotNull IMultiController controller)
     {
         super.addedToController(controller);
+        this.reactor = (IFissionReactor) controller;
 
         var old = storage.copy();
         storage.setSize(getInventorySize());

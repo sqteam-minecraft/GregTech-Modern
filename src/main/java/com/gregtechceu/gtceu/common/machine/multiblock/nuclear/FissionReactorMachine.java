@@ -193,7 +193,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     protected void initializeAbilities() {
         for (IMultiPart part : getParts()) {
             if (part instanceof ReactorRedstoneControlHatch hatch) this.redstoneControl = hatch;
-            if (part instanceof ReactorFuelController fuelController) fuelController.updateFuelRods();
+            //if (part instanceof ReactorFuelController fuelController) fuelController.updateFuelRods();
         }
     }
 
@@ -208,7 +208,15 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         }
 
         this.reactorElements = getMultiblockState().getMatchContext().getOrCreate("reactorElement", Sets::newHashSet);
-        this.reactorElements.forEach(element -> element.assignToReactor(this));
+
+        for (IMultiPart part : getParts()) {
+            if (part instanceof IReactorElement reactorElement){
+                reactorElement.assignToReactor(this);
+
+                assert reactorElements != null;
+                reactorElements.add(reactorElement);
+            }
+        }
     }
 
     @Override
@@ -519,5 +527,14 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     @Override
     public @Nullable ReactorFuel getFuel() {
         return this.fuel;
+    }
+
+    @Override
+    public void updateFuel() {
+        boolean isEmpty = this.reactorElements != null && this.reactorElements.stream()
+                .filter(e -> e instanceof ReactorFuelController)
+                .map(e -> (ReactorFuelController) e)
+                .allMatch(ReactorFuelController::isEmpty);
+        if (isEmpty) this.fuel = null;
     }
 }

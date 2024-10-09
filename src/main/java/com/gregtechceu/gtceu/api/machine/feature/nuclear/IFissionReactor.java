@@ -15,4 +15,5 @@ public interface IFissionReactor extends IMachineFeature
     Set<FissionReactorType> getTypes();
     void setFuel(@Nullable ReactorFuel fuel);
     @Nullable ReactorFuel getFuel();
+    void updateFuel();
 }
