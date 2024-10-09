@@ -22,7 +22,6 @@ import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.content.ContentModifier;
 import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
 import com.gregtechceu.gtceu.api.recipe.logic.OCResult;
-import com.gregtechceu.gtceu.common.block.FuelRod;
 import com.gregtechceu.gtceu.common.capability.EnvironmentalHazardSavedData;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
 import com.gregtechceu.gtceu.common.data.GTRecipeModifiers;
@@ -73,12 +72,17 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     @NotNull
     private Set<ReactorFuel> fuels;
     @Persisted
+    @Nullable
+    private ReactorFuel fuel;
+    @Persisted
     @Getter
     @Setter
     private int heat = 0;
+    @Persisted
     @Getter
     @Setter
     private int excessHeat = 0;
+    @Persisted
     private int throttle = 15;
     // runtime
     @Getter
@@ -114,9 +118,8 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     }
 
     protected void updateHeatSubscription() {
-        if (subscription == null) {
-            subscription = subscribeServerTick(null, this::updateHeat);
-        } else {
+        if (subscription == null) subscription = subscribeServerTick(null, this::updateHeat);
+        else {
             subscription.unsubscribe();
             subscription = null;
         }
@@ -189,12 +192,8 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
 
     protected void initializeAbilities() {
         for (IMultiPart part : getParts()) {
-            if (part instanceof ReactorRedstoneControlHatch hatch) {
-                this.redstoneControl = hatch;
-            }
-            if (part instanceof ReactorFuelController fuelController) {
-                fuelController.updateFuelRods();
-            }
+            if (part instanceof ReactorRedstoneControlHatch hatch) this.redstoneControl = hatch;
+            if (part instanceof ReactorFuelController fuelController) fuelController.updateFuelRods();
         }
     }
 
@@ -204,13 +203,12 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         initializeAbilities();
 
         if (reactorElements != null) {
-            this.reactorElements.forEach(element -> element.setReactor(null));
+            this.reactorElements.forEach(element -> element.assignToReactor(null));
             this.reactorElements = null;
         }
-        Set<IReactorElement> elements = getMultiblockState().getMatchContext().getOrCreate("reactorElement",
-                Sets::newHashSet);
-        this.reactorElements = ImmutableSet.copyOf(elements);
-        this.reactorElements.forEach(element -> element.setReactor(this));
+
+        this.reactorElements = getMultiblockState().getMatchContext().getOrCreate("reactorElement", Sets::newHashSet);
+        this.reactorElements.forEach(element -> element.assignToReactor(this));
     }
 
     @Override
@@ -218,7 +216,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         super.onStructureInvalid();
         this.heat = MIN_HEAT;
         if (reactorElements != null) {
-            this.reactorElements.forEach(element -> element.setReactor(null));
+            this.reactorElements.forEach(element -> element.assignToReactor(null));
             this.reactorElements = null;
         }
     }
@@ -511,5 +509,15 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     @Override
     public Set<FissionReactorType> getTypes() {
         return this.reactorType == null ? Set.of() : Set.of(this.reactorType);
+    }
+
+    @Override
+    public void setFuel(@Nullable ReactorFuel fuel) {
+        this.fuel = fuel;
+    }
+
+    @Override
+    public @Nullable ReactorFuel getFuel() {
+        return this.fuel;
     }
 }

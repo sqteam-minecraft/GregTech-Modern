@@ -618,6 +618,7 @@ public class GTBlocks {
             .properties(p -> p.isValidSpawn((state, level, pos, ent) -> false).noOcclusion())
             .blockstate(GTModels.createReactorFuelRodBlockModel("fuel_rod"))
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
+            .color(() -> FuelRod::tintColor)
             .item(BlockItem::new)
             .build()
             .register();

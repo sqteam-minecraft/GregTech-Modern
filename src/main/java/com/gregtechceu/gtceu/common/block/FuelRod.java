@@ -8,6 +8,7 @@ import com.gregtechceu.gtceu.api.machine.feature.nuclear.IFissionReactor;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import lombok.Getter;
 import lombok.NonNull;
+import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
@@ -18,11 +19,12 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,6 +36,7 @@ public class FuelRod extends AppearanceBlock implements IReactorFuelRod, SimpleW
     private IFissionReactor reactor;
 
     public static final EnumProperty<VLinkTypes> V_LINK = EnumProperty.create("vlink", VLinkTypes.class);
+    public static final EnumProperty<ReactorFuel> FUEL_TYPE = EnumProperty.create("fuel", ReactorFuel.class);
     public static final IntegerProperty RODS = IntegerProperty.create("rods", 0, 0xFF);
 
     public FuelRod(Properties properties) {
@@ -41,9 +44,19 @@ public class FuelRod extends AppearanceBlock implements IReactorFuelRod, SimpleW
         registerDefaultState(defaultBlockState()
                 .setValue(V_LINK, VLinkTypes.NONE)
                 .setValue(RODS, 0)
-                .setValue(BlockStateProperties.WATERLOGGED, false));
+                .setValue(BlockStateProperties.WATERLOGGED, false)
+                .setValue(FUEL_TYPE, ReactorFuel.URANIUM));
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public static BlockColor tintColor() {
+        return (state, reader, pos, tintIndex) -> {
+            if (state.getBlock() instanceof FuelRod) {
+                if (tintIndex == 0) return state.getValue(FUEL_TYPE).getFuel().getLayerARGB(0);
+            }
+            return -1;
+        };
+    }
 
     @Override
     public int getUses() {
@@ -64,20 +77,20 @@ public class FuelRod extends AppearanceBlock implements IReactorFuelRod, SimpleW
 
     @Nullable
     @Override
-    public IFissionReactor getFissionReactor()
+    public IFissionReactor getAssignedReactor()
     {
         return reactor;
     }
 
     @Override
-    public void setReactor(@Nullable IFissionReactor reactor)
+    public void assignToReactor(@Nullable IFissionReactor reactor)
     {
         this.reactor = reactor;
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder.add(V_LINK, RODS, BlockStateProperties.WATERLOGGED));
+        super.createBlockStateDefinition(builder.add(V_LINK, RODS, FUEL_TYPE, BlockStateProperties.WATERLOGGED));
     }
 
     @Override
@@ -102,7 +115,8 @@ public class FuelRod extends AppearanceBlock implements IReactorFuelRod, SimpleW
     public void onPlace(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull BlockState oldState, boolean movedByPiston) {
         if (!level.isClientSide()) {
             if (state.getBlock() != oldState.getBlock())
-                updateVLinkState(state.setValue(RODS, level.random.nextInt(0, 0xFF)), level, pos);
+                updateVLinkState(state.setValue(RODS, level.random.nextInt(0, 0xFF)).setValue(FUEL_TYPE,
+                        ReactorFuel.values()[level.random.nextInt(0, ReactorFuel.values().length)]), level, pos);
         }
         super.onPlace(state, level, pos, oldState, movedByPiston);
     }

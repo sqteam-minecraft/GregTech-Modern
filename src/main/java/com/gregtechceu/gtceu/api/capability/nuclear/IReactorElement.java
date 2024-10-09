@@ -12,12 +12,12 @@ public interface IReactorElement {
      * @return the fission reactor the machine is part of
      */
     @Nullable
-    IFissionReactor getFissionReactor();
+    IFissionReactor getAssignedReactor();
 
     /**
      * sets the element's fission reactor to the provided one
      *
      * @param reactor the fission reactor to assign to this reactor element
      */
-    void setReactor(IFissionReactor reactor);
+    void assignToReactor(IFissionReactor reactor);
 }
