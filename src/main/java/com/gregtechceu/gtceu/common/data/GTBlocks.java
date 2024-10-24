@@ -6,7 +6,6 @@ import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.addon.AddonFinder;
 import com.gregtechceu.gtceu.api.addon.events.MaterialCasingCollectionEvent;
 import com.gregtechceu.gtceu.api.block.*;
-import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
@@ -88,10 +87,9 @@ import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.gregtechceu.gtceu.api.GTValues.*;
@@ -305,6 +303,59 @@ public class GTBlocks {
                 .build()
                 .register();
         CABLE_BLOCKS_BUILDER.put(insulation.tagPrefix, material, entry);
+    }
+
+    private static void generateHeatExchangerBlocks() {
+        GTCEu.LOGGER.debug("Generating GTCEu Heat Exchanger Blocks...");
+        Map<Material, GTRegistrate> heatPipeMaterials = new HashMap<>();
+        Map<Material, GTRegistrate> heatPlateMaterials = new HashMap<>();
+
+        var fluidPipeType = FluidPipeType.TINY;
+        for (MaterialRegistry registry : GTCEuAPI.materialManager.getRegistries()) {
+            GTRegistrate registrate = registry.getRegistrate();
+            for (Material material : registry.getAllMaterials()) {
+                if (allowHeatExchangerPlate(material)) {
+                    if (allowFluidPipeBlock(material, fluidPipeType))
+                        heatPipeMaterials.put(material, registrate);
+                    else heatPlateMaterials.put(material, registrate);
+                }
+            }
+        }
+
+        heatPipeMaterials.forEach((heatPipeMaterial, r) -> {
+            heatPlateMaterials.forEach((heatPlateMaterial, r1) -> {
+                registerHeatExchangerBlock(heatPipeMaterial, heatPlateMaterial, r);
+            });
+        });
+    }
+
+    private static void registerHeatExchangerBlock(Material heatPipeMaterial, Material heatPlateMaterial,
+                                                   GTRegistrate registrate) {
+        Function<String, String> capitalize = s -> s.substring(0, 1).toUpperCase() + s.substring(1);
+
+        registrate
+                .block("%s_%s_heat_exchanger".formatted(heatPipeMaterial.getName(),
+                                heatPlateMaterial.getName()), ReactorHeatExchanger::new)
+                .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> {
+                    p.sound(GTSoundTypes.METAL_PIPE);
+                    return p.noOcclusion();
+                })
+                .lang("%s-%s Heat Exchanger".formatted(capitalize.apply(heatPipeMaterial.getName()),
+                        capitalize.apply(heatPlateMaterial.getName())))
+                .blockstate(GTModels.createVerticalModelLinkBlockModel("reactor_heat_exchanger",
+                        "nuclear/", ReactorHeatExchanger.class))
+                .color(() -> ReactorHeatExchanger.tintColor(heatPipeMaterial.getLayerARGB(0),
+                        heatPlateMaterial.getLayerARGB(0)))
+                .item(BlockItem::new)
+                .color(() -> ReactorHeatExchanger.tintItemColor(heatPipeMaterial.getLayerARGB(0),
+                        heatPlateMaterial.getLayerARGB(0)))
+                .build()
+                .register();
+    }
+
+    private static boolean allowHeatExchangerPlate(Material material) {
+        return material.hasProperty(PropertyKey.HEAT_EXCHANGER);
     }
 
     // Fluid Pipe Blocks
@@ -609,10 +660,12 @@ public class GTBlocks {
             "tungstensteel_turbine_casing", GTCEu.id("block/casings/mechanic/machine_casing_turbine_tungstensteel"));
 
     // Nuclear
-    public static final BlockEntry<Block> CASING_REINFORCED_BOROSILICATE_GLASS = createGlassCasingBlock("reinforced_borosilicate_glass_casing",
+    public static final BlockEntry<Block> CASING_REINFORCED_BOROSILICATE_GLASS = createGlassCasingBlock(
+            "reinforced_borosilicate_glass_casing",
             GTCEu.id("block/casings/nuclear/machine_casing_reinforced_borosilicate_glass"),
             () -> RenderType::translucent);
-    public static final BlockEntry<? extends IReactorFuelRod> FUEL_ROD = REGISTRATE
+
+    public static final BlockEntry<FuelRod> FUEL_ROD = REGISTRATE
             .block("fuel_rod", FuelRod::new)
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.isValidSpawn((state, level, pos, ent) -> false).noOcclusion())
@@ -1721,12 +1774,13 @@ public class GTBlocks {
 
         // Procedural Pipes/Wires
         REGISTRATE.creativeModeTab(() -> GTCreativeModeTabs.MATERIAL_PIPE);
-        generateCableBlocks();        // Cable & Wire Blocks
-        generateFluidPipeBlocks();    // Fluid Pipe Blocks
-        generateItemPipeBlocks();     // Item Pipe Blocks
-        generateLaserPipeBlocks();    // Laser Pipe Blocks
-        generateOpticalPipeBlocks();  // Optical Pipe Blocks
-        generateDuctPipeBlocks();     // Duct Pipe Blocks
+        generateCableBlocks();         // Cable & Wire Blocks
+        generateFluidPipeBlocks();     // Fluid Pipe Blocks
+        generateItemPipeBlocks();      // Item Pipe Blocks
+        generateLaserPipeBlocks();     // Laser Pipe Blocks
+        generateOpticalPipeBlocks();   // Optical Pipe Blocks
+        generateDuctPipeBlocks();      // Duct Pipe Blocks
+        generateHeatExchangerBlocks(); // Heat Exchanger Blocks
 
         // Remove Builder Tables
         MATERIAL_BLOCKS_BUILDER = null;

@@ -210,6 +210,7 @@ public class ElementMaterials {
                 .element(GTElements.Cu)
                 .cableProperties(GTValues.V[2], 1, 2)
                 .fluidPipeProperties(1696, 6, true)
+                .heatExchangerProperty()
                 .buildAndRegister();
 
         Curium = new Material.Builder(GTCEu.id("curium"))

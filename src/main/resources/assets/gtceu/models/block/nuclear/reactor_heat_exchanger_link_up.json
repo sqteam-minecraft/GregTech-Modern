@@ -1,0 +1,74 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"1": "gtceu:block/nuclear/reactor_heat_exchanger_pipe",
+		"particle": "gtceu:block/nuclear/reactor_heat_exchanger_plate"
+	},
+	"elements": [
+		{
+			"name": "hp_top_nw",
+			"from": [2, 15, 2],
+			"to": [5, 16, 5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [3, 0, 3]},
+			"faces": {
+				"north": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"east": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"south": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"west": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"up": {"uv": [3, 0, 6, 3], "texture": "#1", "tintindex": 0},
+				"down": {"uv": [3, 0, 6, 3], "texture": "#1", "tintindex": 0}
+			}
+		},
+		{
+			"name": "hp_top_ne",
+			"from": [11, 15, 2],
+			"to": [14, 16, 5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [12, 0, 3]},
+			"faces": {
+				"north": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"east": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"south": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"west": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"up": {"uv": [3, 0, 6, 3], "texture": "#1", "tintindex": 0},
+				"down": {"uv": [3, 0, 6, 3], "texture": "#1", "tintindex": 0}
+			}
+		},
+		{
+			"name": "hp_top_se",
+			"from": [11, 15, 11],
+			"to": [14, 16, 14],
+			"rotation": {"angle": 0, "axis": "y", "origin": [12, 0, 12]},
+			"faces": {
+				"north": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"east": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"south": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"west": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"up": {"uv": [3, 0, 6, 3], "texture": "#1", "tintindex": 0},
+				"down": {"uv": [3, 0, 6, 3], "texture": "#1", "tintindex": 0}
+			}
+		},
+		{
+			"name": "hp_top_sw",
+			"from": [2, 15, 11],
+			"to": [5, 16, 14],
+			"rotation": {"angle": 0, "axis": "y", "origin": [3, 0, 12]},
+			"faces": {
+				"north": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"east": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"south": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"west": {"uv": [0, 0, 3, 1], "texture": "#1", "tintindex": 0},
+				"up": {"uv": [3, 0, 6, 3], "texture": "#1", "tintindex": 0},
+				"down": {"uv": [3, 0, 6, 3], "texture": "#1", "tintindex": 0}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "heat_pipes",
+			"origin": [13, 0, 2],
+			"color": 0,
+			"children": [0, 1, 2, 3]
+		}
+	]
+}

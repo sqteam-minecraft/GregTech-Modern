@@ -13,10 +13,13 @@ import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
 import com.gregtechceu.gtceu.api.recipe.logic.OCResult;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.FluidHatchPartMachine;
+
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import lombok.Getter;
+
 import net.minecraft.core.BlockPos;
+
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,14 +27,13 @@ import java.util.*;
 import java.util.function.Function;
 
 @Getter
-public class LargeHeatExchanger extends WorkableMultiblockMachine implements IExplosionMachine, IDisplayUIMachine
-{
+public class LargeHeatExchanger extends WorkableMultiblockMachine implements IExplosionMachine, IDisplayUIMachine {
+
     private FluidHatchPartMachine hotInput;
     private FluidHatchPartMachine coldInput;
 
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(LargeHeatExchanger.class,
             WorkableMultiblockMachine.MANAGED_FIELD_HOLDER);
-
 
     public LargeHeatExchanger(IMachineBlockEntity holder, Object... args) {
         super(holder, args);
@@ -81,7 +83,8 @@ public class LargeHeatExchanger extends WorkableMultiblockMachine implements IEx
 
         var hotInputFluid = inputFluids.get(0);
         var coldInputFluid = inputFluids.get(1);
-        if (hotInputFluid.getFluid().getFluidType().getTemperature() < coldInputFluid.getFluid().getFluidType().getTemperature()) {
+        if (hotInputFluid.getFluid().getFluidType().getTemperature() <
+                coldInputFluid.getFluid().getFluidType().getTemperature()) {
             hotInputFluid = inputFluids.get(1);
             coldInputFluid = inputFluids.get(0);
         }

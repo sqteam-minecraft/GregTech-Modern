@@ -1,7 +1,5 @@
 package com.gregtechceu.gtceu.common.machine.multiblock.nuclear;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
@@ -29,10 +27,10 @@ import com.gregtechceu.gtceu.common.item.PortableScannerBehavior;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear.ReactorFuelController;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear.ReactorRedstoneControlHatch;
 import com.gregtechceu.gtceu.utils.GTUtil;
+
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import lombok.Getter;
-import lombok.Setter;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -45,6 +43,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+
+import com.google.common.collect.Sets;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,8 +56,8 @@ import static com.gregtechceu.gtceu.api.pattern.Predicates.abilities;
 import static com.gregtechceu.gtceu.api.pattern.Predicates.states;
 
 public class FissionReactorMachine extends WorkableMultiblockMachine
-        implements IFissionReactor, IDisplayUIMachine, IDataInfoProvider
-{
+                                   implements IFissionReactor, IDisplayUIMachine, IDataInfoProvider {
+
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(FissionReactorMachine.class,
             WorkableMultiblockMachine.MANAGED_FIELD_HOLDER);
 
@@ -67,8 +69,8 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
 
     @Persisted
     private int lDist = 0, rDist = 0, bDist = 0, fDist = 0, hDist = 0;
-    @Nullable
-    private FissionReactorType reactorType = null;
+    @NotNull
+    private final FissionReactorType reactorType;
     @NotNull
     private Set<ReactorFuel> fuels;
     @Persisted
@@ -93,7 +95,8 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     private TickableSubscription subscription;
     private ReactorRedstoneControlHatch redstoneControl;
 
-    public FissionReactorMachine(IMachineBlockEntity holder, FissionReactorType reactorType, Set<ReactorFuel> fuels) {
+    public FissionReactorMachine(IMachineBlockEntity holder, @NotNull FissionReactorType reactorType,
+                                 @NotNull Set<ReactorFuel> fuels) {
         super(holder);
         this.reactorType = reactorType;
         this.fuels = fuels;
@@ -132,9 +135,9 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         BlockPos pos = getPos();
         EnvironmentalHazardSavedData environmentalHazards = EnvironmentalHazardSavedData
                 .getOrCreate(level);
-//            environmentalHazards.addZone(level.getChunk(pos).getPos(),
-//                    new EnvironmentalHazardSavedData.HazardZone(pos, 1, true,
-//                            HazardProperty.HazardTrigger.ANY, GTMedicalConditions.CARCINOGEN));
+        // environmentalHazards.addZone(level.getChunk(pos).getPos(),
+        // new EnvironmentalHazardSavedData.HazardZone(pos, 1, true,
+        // HazardProperty.HazardTrigger.ANY, GTMedicalConditions.CARCINOGEN));
         if (redstoneControl != null) {
             int signal = redstoneControl.getRedstoneSignalStrength();
             this.throttle = 15 - signal;
@@ -179,7 +182,8 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
                 recipe.ingredientActions,
                 recipe.data, recipe.duration, false);
 
-        reactorMachine.heat = Math.max(reactorMachine.heat - singleHeatConsumption * parallelResult.getSecond(), MIN_HEAT);
+        reactorMachine.heat = Math.max(reactorMachine.heat - singleHeatConsumption * parallelResult.getSecond(),
+                MIN_HEAT);
 
         result.init(0, recipe.duration, parallelResult.getSecond(), params.getOcAmount());
 
@@ -193,7 +197,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     protected void initializeAbilities() {
         for (IMultiPart part : getParts()) {
             if (part instanceof ReactorRedstoneControlHatch hatch) this.redstoneControl = hatch;
-            //if (part instanceof ReactorFuelController fuelController) fuelController.updateFuelRods();
+            // if (part instanceof ReactorFuelController fuelController) fuelController.updateFuelRods();
         }
     }
 
@@ -210,7 +214,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         this.reactorElements = getMultiblockState().getMatchContext().getOrCreate("reactorElement", Sets::newHashSet);
 
         for (IMultiPart part : getParts()) {
-            if (part instanceof IReactorElement reactorElement){
+            if (part instanceof IReactorElement reactorElement) {
                 reactorElement.assignToReactor(this);
 
                 assert reactorElements != null;
@@ -300,7 +304,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     public boolean isBlockEdge(@NotNull Level world, @NotNull BlockPos.MutableBlockPos pos,
                                @NotNull Direction direction) {
         assert reactorType != null; // todo remove nulls
-        return world.getBlockState(pos.move(direction)) == reactorType.getCasing().getDefaultState();
+        return world.getBlockState(pos.move(direction)) == reactorType.casing().getDefaultState();
     }
 
     /**
@@ -313,7 +317,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
                                 @NotNull Direction direction) {
         if (isBlockEdge(world, pos, direction)) return true;
         assert reactorType != null; // todo remove nulls
-        return world.getBlockState(pos) == reactorType.getWall().getDefaultState();
+        return world.getBlockState(pos) == reactorType.wall().getDefaultState();
     }
 
     @NotNull
@@ -340,7 +344,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         StringBuilder borderBuilder = new StringBuilder();     // BBBBB
         StringBuilder wallBuilder = new StringBuilder();       // BWWWB
         StringBuilder roofBuilder = new StringBuilder();       // BRRRB
-        StringBuilder insideBuilder = new StringBuilder();     // W   W
+        StringBuilder insideBuilder = new StringBuilder();     // W W
         StringBuilder controllerBuilder = new StringBuilder(); // BWCWB
         StringBuilder centerBuilder = new StringBuilder();     // BWKWB
 
@@ -394,12 +398,12 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         wall[0] = borderBuilder.toString();
         wall[wall.length - 1] = borderBuilder.toString();
 
-        String[] slice = new String[hDist + 1]; // "BWWWB", "W   W", "W   W", "W   W", "BWWWB"
+        String[] slice = new String[hDist + 1]; // "BWWWB", "W W", "W W", "W W", "BWWWB"
         Arrays.fill(slice, insideBuilder.toString());
         slice[0] = wallBuilder.toString();
         slice[slice.length - 1] = roofBuilder.toString();
 
-        String[] center = Arrays.copyOf(slice, slice.length); // "BWKWB", "W   W", "W   W", "W   W", "BWCWB"
+        String[] center = Arrays.copyOf(slice, slice.length); // "BWKWB", "W W", "W W", "W W", "BWCWB"
         if (this.getFrontFacing() == Direction.NORTH || this.getFrontFacing() == Direction.SOUTH) {
             center[0] = centerBuilder.reverse().toString();
             center[center.length - 1] = controllerBuilder.reverse().toString();
@@ -409,9 +413,8 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         }
 
         TraceabilityPredicate wallPredicate = states(getWallState());
-        TraceabilityPredicate basePredicate =
-                Predicates.autoAbilities(true, false, false)
-                        .or(abilities(PartAbility.REACTOR_REDSTONE_CONTROL).setMaxGlobalLimited(1));
+        TraceabilityPredicate basePredicate = Predicates.autoAbilities(true, false, false)
+                .or(abilities(PartAbility.REACTOR_REDSTONE_CONTROL).setMaxGlobalLimited(1));
 
         // layer the slices one behind the next
         return FactoryBlockPattern.start()
@@ -433,7 +436,9 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     }
 
     @NotNull
-    protected BlockState getCasingState() { return GTBlocks.CASING_STEEL_SOLID.getDefaultState(); }
+    protected BlockState getCasingState() {
+        return GTBlocks.CASING_STEEL_SOLID.getDefaultState();
+    }
 
     @NotNull
     protected BlockState getWallState() {
@@ -446,20 +451,20 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
             Set<IReactorElement> elements = blockWorldState.getMatchContext().getOrCreate("reactorElement",
                     Sets::newHashSet);
             BlockState block = blockWorldState.getBlockState();
-            if (block.getBlock() == Blocks.AIR){
+            if (block.getBlock() == Blocks.AIR) {
                 return true;
             }
-            if (block.getBlock() == GTBlocks.FUEL_ROD.get()){
+            if (block.getBlock() == GTBlocks.FUEL_ROD.get()) {
                 return true;
             }
 
-//            if (blockEntity != null) {
-//                var element = GTCapabilityHelper.getReactorElement(blockWorldState.getWorld(),
-//                        blockWorldState.getPos(), null);
-//                if (element != null) {
-//                    elements.add(element);
-//                }
-//            }
+            // if (blockEntity != null) {
+            // var element = GTCapabilityHelper.getReactorElement(blockWorldState.getWorld(),
+            // blockWorldState.getPos(), null);
+            // if (element != null) {
+            // elements.add(element);
+            // }
+            // }
             return false;
         }, null) {
 

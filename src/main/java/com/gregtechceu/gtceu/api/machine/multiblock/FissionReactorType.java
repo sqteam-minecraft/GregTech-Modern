@@ -1,10 +1,12 @@
 package com.gregtechceu.gtceu.api.machine.multiblock;
 
 import com.gregtechceu.gtceu.common.data.GTBlocks;
+
+import net.minecraft.world.level.block.Block;
+
 import com.mojang.serialization.Codec;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,9 +14,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class FissionReactorType
-{
-    private static final Map<String, FissionReactorType> FISSON_CONTROLLER_TYPES = new Object2ObjectOpenHashMap<>();
+public record FissionReactorType(String name, String translationKey, @Nullable BlockEntry<Block> casing,
+                                 @Nullable BlockEntry<Block> wall) {
+
+    private static final Map<String, FissionReactorType> FISSION_CONTROLLER_TYPES = new Object2ObjectOpenHashMap<>();
 
     public static final FissionReactorType TIER_1 = new FissionReactorType("fisson_controller_1",
             "gtceu.recipe.fisson_controller_1.display_name",
@@ -29,17 +32,12 @@ public class FissionReactorType
             null,
             null);
 
-    public static final Codec<FissionReactorType> CODEC = Codec.STRING.xmap(FISSON_CONTROLLER_TYPES::get, FissionReactorType::getName);
+    public static final Codec<FissionReactorType> CODEC = Codec.STRING.xmap(FISSION_CONTROLLER_TYPES::get,
+            FissionReactorType::name);
 
-    private final String name;
-    private final String translationKey;
-    @Nullable
-    private final BlockEntry<Block> casing;
-    @Nullable
-    private final BlockEntry<Block> wall;
-
-    public FissionReactorType(@NotNull String name, @NotNull String translationKey, @Nullable BlockEntry<Block> casing, @Nullable BlockEntry<Block> wall) {
-        if (FISSON_CONTROLLER_TYPES.get(name) != null)
+    public FissionReactorType(@NotNull String name, @NotNull String translationKey, @Nullable BlockEntry<Block> casing,
+                              @Nullable BlockEntry<Block> wall) {
+        if (FISSION_CONTROLLER_TYPES.get(name) != null)
             throw new IllegalArgumentException(
                     String.format("FissionControllerType with name %s is already registered!", name));
 
@@ -47,50 +45,50 @@ public class FissionReactorType
         this.translationKey = translationKey;
         this.casing = casing;
         this.wall = wall;
-        FISSON_CONTROLLER_TYPES.put(name, this);
+
+        FISSION_CONTROLLER_TYPES.put(name, this);
     }
 
+    @Override
     @NotNull
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
+    @Override
     @NotNull
-    public String getTranslationKey() {
+    public String translationKey() {
         return this.translationKey;
     }
 
+    @Override
     @NotNull
-    public BlockEntry<Block> getCasing() {
-        if (this.casing == null) {
+    public BlockEntry<Block> casing() {
+        if (this.casing == null)
             throw new IllegalStateException("Casing is not defined for this FissionControllerType");
-        }
         return this.casing;
     }
 
+    @Override
     @NotNull
-    public BlockEntry<Block> getWall() {
-        if (this.wall == null) {
-            throw new IllegalStateException("Wall is not defined for this FissionControllerType");
-        }
+    public BlockEntry<Block> wall() {
+        if (this.wall == null) throw new IllegalStateException("Wall is not defined for this FissionControllerType");
         return this.wall;
     }
 
     @Nullable
     public static FissionReactorType getByName(@Nullable String name) {
-        return FISSON_CONTROLLER_TYPES.get(name);
+        return FISSION_CONTROLLER_TYPES.get(name);
     }
 
     @NotNull
     public static FissionReactorType getByNameOrDefault(@Nullable String name) {
         var type = getByName(name);
-        if (type == null) {
-            return TIER_1;
-        }
+        if (type == null) return TIER_1;
         return type;
     }
 
     public static Set<FissionReactorType> getAllTypes() {
-        return new HashSet<>(FISSON_CONTROLLER_TYPES.values());
+        return new HashSet<>(FISSION_CONTROLLER_TYPES.values());
     }
 }

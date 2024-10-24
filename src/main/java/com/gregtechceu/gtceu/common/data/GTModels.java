@@ -261,23 +261,27 @@ public class GTModels {
         };
     }
 
-    public static NonNullBiConsumer<DataGenContext<Block, FuelRod>, RegistrateBlockstateProvider> createReactorFuelRodBlockModel(String name) {
+    public static <T extends Block> NonNullBiConsumer<DataGenContext<Block, T>, RegistrateBlockstateProvider> createVerticalModelLinkBlockModel(String name, String path, Class<T> clazz) {
         return (ctx, prov) -> {
-            ModelFile parentBase = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name));
+            AtomicReference<MultiPartBlockStateBuilder> builder = new AtomicReference<>(
+                    prov.getMultipartBuilder(ctx.getEntry()));
+
+            ModelFile parentBase = prov.models().getExistingFile(prov.modLoc("block/" + path + name));
             ModelBuilder<?> model = prov.models()
                     .getBuilder(ctx.getName())
                     .parent(parentBase);
-            ModelFile parentBaseLinkUp = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name + "_link_up"));
+            ModelFile parentBaseLinkUp = prov.models()
+                    .getExistingFile(prov.modLoc("block/" + path + name + "_link_up"));
             ModelBuilder<?> modelLinkUp = prov.models()
                     .getBuilder(ctx.getName() + "_link_up")
                     .parent(parentBaseLinkUp);
-            ModelFile parentBaseLinkDown = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name + "_link_down"));
+            ModelFile parentBaseLinkDown = prov.models()
+                    .getExistingFile(prov.modLoc("block/" + path + name + "_link_down"));
             ModelBuilder<?> modelLinkDown = prov.models()
                     .getBuilder(ctx.getName() + "_link_down")
                     .parent(parentBaseLinkDown);
-            ModelFile parentBaseCore = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name + "_core"));
 
-            AtomicReference<MultiPartBlockStateBuilder> builder = new AtomicReference<>(prov.getMultipartBuilder(ctx.getEntry())
+            builder.set(builder.get()
                     .part()
                     .modelFile(model)
                     .addModel()
@@ -285,12 +289,25 @@ public class GTModels {
                     .part()
                     .modelFile(modelLinkUp)
                     .addModel()
-                    .condition(FuelRod.V_LINK, FuelRod.VLinkTypes.UP, FuelRod.VLinkTypes.BOTH)
+                    .condition(VerticalModelLinkBlock.V_LINK, VerticalModelLinkBlock.VLinkTypes.UP,
+                            VerticalModelLinkBlock.VLinkTypes.BOTH)
                     .end()
                     .part()
                     .modelFile(modelLinkDown)
-                    .addModel().condition(FuelRod.V_LINK, FuelRod.VLinkTypes.DOWN, FuelRod.VLinkTypes.BOTH)
+                    .addModel()
+                    .condition(VerticalModelLinkBlock.V_LINK, VerticalModelLinkBlock.VLinkTypes.DOWN,
+                            VerticalModelLinkBlock.VLinkTypes.BOTH)
                     .end());
+        };
+    }
+
+    public static NonNullBiConsumer<DataGenContext<Block, FuelRod>, RegistrateBlockstateProvider> createReactorFuelRodBlockModel(String name) {
+        return (ctx, prov) -> {
+            AtomicReference<MultiPartBlockStateBuilder> builder = new AtomicReference<>(
+                    prov.getMultipartBuilder(ctx.getEntry()));
+            createVerticalModelLinkBlockModel(name, "nuclear/", FuelRod.class).accept(ctx, prov);
+
+            ModelFile parentBaseCore = prov.models().getExistingFile(prov.modLoc("block/nuclear/" + name + "_core"));
 
             float scaleSmall = (1f / 16) * 3;
             float scaleBig = (1f / 16) * 9;

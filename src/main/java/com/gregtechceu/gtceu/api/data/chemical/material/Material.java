@@ -1200,6 +1200,11 @@ public class Material implements Comparable<Material> {
             return this;
         }
 
+        public Builder heatExchangerProperty() {
+            properties.setProperty(PropertyKey.HEAT_EXCHANGER, new HeatExchangerProperty());
+            return this;
+        }
+
         @Deprecated
         public Builder addDefaultEnchant(Enchantment enchant, int level) {
             if (!properties.hasProperty(PropertyKey.TOOL)) // cannot assign default here

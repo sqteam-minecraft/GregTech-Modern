@@ -280,7 +280,8 @@ public class GTMaterials {
 
         if (material.getElement() == null) {
             for (var component : material.getMaterialComponents()) {
-                if (component.material().getElement() != null && component.material().getElement().halfLifeSeconds() != -1) {
+                if (component.material().getElement() != null &&
+                        component.material().getElement().halfLifeSeconds() != -1) {
                     decayElement = Map.entry(component.material().getElement(), component.amount());
                     break;
                 }
@@ -318,7 +319,8 @@ public class GTMaterials {
                     requiredSecondaryComponents.forEach(leftoverComponents::remove);
 
                     if (components.containsAll(secondaryComponents) && leftoverComponents.size() == 1 &&
-                            leftoverComponents.removeIf(c -> c.material().getElement() == e && c.amount() == decayableElement.getValue())) {
+                            leftoverComponents.removeIf(
+                                    c -> c.material().getElement() == e && c.amount() == decayableElement.getValue())) {
                         decayMaterial = m;
                         break;
                     }
@@ -954,7 +956,6 @@ public class GTMaterials {
     public static Material UUMatter;
     public static Material PCBCoolant;
     public static Material Sculk;
-
 
     /**
      * Second Degree Compounds

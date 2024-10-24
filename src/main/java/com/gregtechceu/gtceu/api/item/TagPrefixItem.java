@@ -9,10 +9,10 @@ import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.item.armor.ArmorComponentItem;
 import com.gregtechceu.gtceu.client.renderer.item.TagPrefixItemRenderer;
 import com.gregtechceu.gtceu.common.data.GTDamageTypes;
-
 import com.gregtechceu.gtceu.common.data.GTItems;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 import com.gregtechceu.gtceu.utils.GradientUtil;
+
 import com.lowdragmc.lowdraglib.Platform;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -85,7 +85,8 @@ public class TagPrefixItem extends Item {
                             List<Material> decayMaterials = GTMaterials.getDecayMaterials(prefixItem.material);
 
                             if (!decayMaterials.isEmpty()) {
-                                Material decayMaterial = index >= decayMaterials.size() ? decayMaterials.get(decayMaterials.size() - 1) : decayMaterials.get(index);
+                                Material decayMaterial = index >= decayMaterials.size() ?
+                                        decayMaterials.get(decayMaterials.size() - 1) : decayMaterials.get(index);
 
                                 c = decayMaterial.getLayerARGB(index);
                                 c = c == -1 ? 0xFF121212 : c;
@@ -123,9 +124,8 @@ public class TagPrefixItem extends Item {
         int decayTime = stack.getOrCreateTag().getInt("DecayTime");
         if (decayTime <= 0 || decayProductElement == null) return;
 
-        TriConsumer<Material, List<Component>, Float> decayTooltip =
-                (mat, tooltips, decayProgress) -> tooltips
-                        .add(Component.translatable("gtceu.tooltip.decay", decayProgress));
+        TriConsumer<Material, List<Component>, Float> decayTooltip = (mat, tooltips, decayProgress) -> tooltips
+                .add(Component.translatable("gtceu.tooltip.decay", decayProgress));
         float timeToDecay = decayProductElement.halfLifeSeconds() * 1.443f * 20; // halfLife / ln2
         decayTooltip.accept(material, tooltipComponents, Math.round(decayTime * 10000 / timeToDecay) / 100f);
     }

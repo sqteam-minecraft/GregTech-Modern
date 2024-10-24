@@ -16,6 +16,7 @@ import com.gregtechceu.gtceu.api.machine.multiblock.part.TieredIOPartMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.TieredPartMachine;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.common.block.FuelRod;
+
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
@@ -23,22 +24,22 @@ import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
 import static com.google.common.primitives.Ints.*;
-import static com.gregtechceu.gtceu.common.data.GTMaterials.PlutoniumFissionFuel;
-import static com.gregtechceu.gtceu.common.data.GTMaterials.UraniumFissionFuel;
 
 @Slf4j
 public class ReactorFuelController extends TieredIOPartMachine implements IReactorElement, IMachineLife {
@@ -73,11 +74,12 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
                 reactor.updateFuel();
                 ReactorFuel fuel = reactor.getFuel();
                 if (fuel == null) {
-                    reactor.setFuel(Arrays.stream(ReactorFuel.values()).filter(f -> f.getFuel().equals(tagPrefix.material))
-                            .findFirst().orElse(null));
+                    reactor.setFuel(
+                            Arrays.stream(ReactorFuel.values()).filter(f -> f.getFuel().equals(tagPrefix.material))
+                                    .findFirst().orElse(null));
                     needUpdate = true;
                     return true;
-                };
+                } ;
                 return fuel.getFuel().equals(tagPrefix.material);
             }
             return false;
@@ -154,12 +156,11 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
     }
 
     protected NotifiableItemStackHandler createInventory() {
-        return new NotifiableItemStackHandler(this, 4, io, io, x->this.storage);
+        return new NotifiableItemStackHandler(this, 4, io, io, x -> this.storage);
     }
 
     @Override
-    public void addedToController(@NotNull IMultiController controller)
-    {
+    public void addedToController(@NotNull IMultiController controller) {
         super.addedToController(controller);
         this.reactor = (IFissionReactor) controller;
 
@@ -169,13 +170,14 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
             storage.setStackInSlot(i, old.getStackInSlot(i));
         }
         markDirty("storage");
-        
+
         ServerLevel level = (ServerLevel) getLevel();
         if (level == null) return;
 
         BlockPos pos = getPos().above();
         for (int i = storage.getSlots(); i < old.getSlots(); i++) {
-            getLevel().addFreshEntity(new ItemEntity(getLevel(), pos.getX(), pos.getY(), pos.getZ(), old.getStackInSlot(i)));
+            getLevel().addFreshEntity(
+                    new ItemEntity(getLevel(), pos.getX(), pos.getY(), pos.getZ(), old.getStackInSlot(i)));
         }
     }
 
@@ -199,15 +201,16 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
         int width = 8;
         int height = (storage.getSlots() + 4) / width;
 
-        var group = new WidgetGroup(0, 0, 18 * width + 16+8, 18 * height + 16);
+        var group = new WidgetGroup(0, 0, 18 * width + 16 + 8, 18 * height + 16);
         var containerL = new WidgetGroup(4, 4, 18 * width / 2 + 8, 18 * height + 8);
         var containerR = new WidgetGroup(18 * width / 2 + 12, 4, 18 * width / 2 + 8, 18 * height + 8);
         int index = 0;
         for (int y = 0; y < height; y++) {
-            for(int x = 0; x < width; x++) {
+            for (int x = 0; x < width; x++) {
                 if (index == storage.getSlots()) break;
 
-                var slot = new SlotWidget(inventory.storage, index++, 4 + (x % 4) * 18, 4 + y * 18, true, io.support(IO.BOTH))
+                var slot = new SlotWidget(inventory.storage, index++, 4 + (x % 4) * 18, 4 + y * 18, true,
+                        io.support(IO.BOTH))
                         .setBackgroundTexture(GuiTextures.SLOT);
 
                 if (x < 4) containerL.addWidget(slot);

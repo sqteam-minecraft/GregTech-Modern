@@ -1174,8 +1174,9 @@ public class GTMachines {
             .register();
 
     private static class ReactorFuelControllerBlock extends MetaMachineBlock implements IReactorFuelConnector {
-        public ReactorFuelControllerBlock(Properties properties, MachineDefinition definition)
-        { super(properties, definition); }
+        public ReactorFuelControllerBlock(Properties properties, MachineDefinition definition) {
+            super(properties, definition);
+        }
     }
 
     public static final MachineDefinition[] DIODE = registerTieredMachines("diode",
@@ -2623,8 +2624,7 @@ public class GTMachines {
     public static MultiblockMachineDefinition registerLargeHeatExchanger(String name, Supplier<? extends Block> casing,
                                                                          Supplier<? extends Block> pipe,
                                                                          ResourceLocation texture,
-                                                                         ResourceLocation overlayTexture)
-    {
+                                                                         ResourceLocation overlayTexture) {
         return REGISTRATE
                 .multiblock("large_heat_exchanger", LargeHeatExchanger::new)
                 .rotationState(RotationState.ALL)

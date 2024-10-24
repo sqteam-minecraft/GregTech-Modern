@@ -767,6 +767,7 @@ public class FirstDegreeMaterials {
                 .flags(DISABLE_DECOMPOSITION, GENERATE_FOIL)
                 .components(Carbon, 1)
                 .cableProperties(GTValues.V[5], 1, 1)
+                .heatExchangerProperty()
                 .buildAndRegister();
 
         TungsticAcid = new Material.Builder(GTCEu.id("tungstic_acid"))
