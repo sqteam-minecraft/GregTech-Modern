@@ -35,7 +35,7 @@ public class ReactorHeatExchanger extends AppearanceBlock implements SimpleWater
     @OnlyIn(Dist.CLIENT)
     public static Supplier<BlockColor> tintColor(int pipeColor, int plateColor) {
         return () -> (state, reader, pos, tintIndex) -> {
-            if (state.getBlock() instanceof ReactorHeatExchanger rhe) {
+            if (state.getBlock() instanceof ReactorHeatExchanger) {
                 if (tintIndex == 0) return pipeColor;
                 if (tintIndex == 1) return plateColor;
             }
@@ -53,17 +53,40 @@ public class ReactorHeatExchanger extends AppearanceBlock implements SimpleWater
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos,
-                                boolean movedByPiston) {
-        if (!level.isClientSide) {
-            level.setBlock(pos, state.setValue(V_LINK, retrieveVLinkType(state, level, pos)), 3);
-        }
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder.add(BlockStateProperties.WATERLOGGED, V_LINK));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder.add(BlockStateProperties.WATERLOGGED, V_LINK));
+    @SuppressWarnings("deprecation")
+    public @NotNull FluidState getFluidState(BlockState state) {
+        return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) :
+                super.getFluidState(state);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public @NotNull BlockState updateShape(BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState,
+                                           @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
+        if (state.getValue(BlockStateProperties.WATERLOGGED))
+            level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onPlace(@NotNull BlockState state, @NotNull Level level,
+                        @NotNull BlockPos pos, @NotNull BlockState oldState, boolean movedByPiston) {
+        VerticalModelLinkBlock.super.onPlace(state, level, pos, oldState, movedByPiston);
+        super.onPlace(level.getBlockState(pos), level, pos, state, movedByPiston);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void neighborChanged(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos,
+                                @NotNull Block neighborBlock, @NotNull BlockPos neighborPos, boolean movedByPiston) {
+        VerticalModelLinkBlock.super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        super.neighborChanged(level.getBlockState(pos), level, pos, neighborBlock, neighborPos, movedByPiston);
     }
 
     @Override
@@ -77,33 +100,5 @@ public class ReactorHeatExchanger extends AppearanceBlock implements SimpleWater
             case 0b11 -> VLinkTypes.BOTH;
             default -> VLinkTypes.NONE;
         };
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public @NotNull FluidState getFluidState(BlockState state) {
-        return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) :
-                super.getFluidState(state);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public @NotNull BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
-                                           LevelAccessor level,
-                                           BlockPos pos, BlockPos neighborPos) {
-        if (state.getValue(BlockStateProperties.WATERLOGGED))
-            level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public void onPlace(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull BlockState oldState,
-                        boolean movedByPiston) {
-        if (!level.isClientSide()) {
-            if (state.getBlock() != oldState.getBlock())
-                level.setBlock(pos, state.setValue(V_LINK, retrieveVLinkType(state, level, pos)), 3);
-        }
-        super.onPlace(state, level, pos, oldState, movedByPiston);
     }
 }

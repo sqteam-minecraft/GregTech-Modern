@@ -100,9 +100,8 @@ public class FuelRod extends AppearanceBlock implements IReactorFuelRod,
 
     @Override
     @SuppressWarnings("deprecation")
-    public @NotNull BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
-                                           LevelAccessor level,
-                                           BlockPos pos, BlockPos neighborPos) {
+    public @NotNull BlockState updateShape(BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState,
+                                           @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
         if (state.getValue(BlockStateProperties.WATERLOGGED)) {
             level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
@@ -111,20 +110,18 @@ public class FuelRod extends AppearanceBlock implements IReactorFuelRod,
 
     @Override
     @SuppressWarnings("deprecation")
-    public void onPlace(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull BlockState oldState,
-                        boolean movedByPiston) {
-        super.onPlace(state.setValue(RODS, level.random.nextInt(0, 0xFF)).setValue(FUEL_TYPE,
-                ReactorFuel.values()[level.random.nextInt(0, ReactorFuel.values().length)])
-                .setValue(V_LINK, retrieveVLinkType(state, level, pos)), level, pos, oldState, movedByPiston);
+    public void onPlace(@NotNull BlockState state, @NotNull Level level,
+                        @NotNull BlockPos pos, @NotNull BlockState oldState, boolean movedByPiston) {
+        VerticalModelLinkBlock.super.onPlace(state, level, pos, oldState, movedByPiston);
+        super.onPlace(level.getBlockState(pos), level, pos, state, movedByPiston);
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos,
-                                boolean movedByPiston) {
-        if (!level.isClientSide) {
-            level.setBlock(pos, state.setValue(V_LINK, retrieveVLinkType(state, level, pos)), 3);
-        }
+    public void neighborChanged(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos,
+                                @NotNull Block neighborBlock, @NotNull BlockPos neighborPos, boolean movedByPiston) {
+        VerticalModelLinkBlock.super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        super.neighborChanged(level.getBlockState(pos), level, pos, neighborBlock, neighborPos, movedByPiston);
     }
 
     @Override
