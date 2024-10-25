@@ -1,4 +1,6 @@
-package com.gregtechceu.gtceu.common.block;
+package com.gregtechceu.gtceu.api.block;
+
+import com.gregtechceu.gtceu.common.block.ReactorHeatExchanger;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.StringRepresentable;
@@ -23,6 +25,18 @@ public interface VerticalModelLinkBlock {
      * @see Block#createBlockStateDefinition(StateDefinition.Builder)
      */
     EnumProperty<VLinkTypes> V_LINK = EnumProperty.create("vlink", VLinkTypes.class);
+
+    /**
+     * Retrieves the type of vertical link the block has
+     *
+     * @param state the block state of the block
+     * @param level the level the block is in
+     * @param pos   the position of the block
+     * @return the type of vertical link the block has
+     *
+     * @see ReactorHeatExchanger#retrieveVLinkType(BlockState, Level, BlockPos)
+     */
+    VLinkTypes retrieveVLinkType(BlockState state, Level level, BlockPos pos);
 
     /**
      * Call this method when the block is placed
@@ -58,16 +72,6 @@ public interface VerticalModelLinkBlock {
                                  BlockPos neighborPos, boolean movedByPiston) {
         if (!level.isClientSide) level.setBlock(pos, state.setValue(V_LINK, retrieveVLinkType(state, level, pos)), 3);
     }
-
-    /**
-     * Retrieves the type of vertical link the block has
-     * 
-     * @param state the block state of the block
-     * @param level the level the block is in
-     * @param pos   the position of the block
-     * @return the type of vertical link the block has
-     */
-    VLinkTypes retrieveVLinkType(BlockState state, Level level, BlockPos pos);
 
     /**
      * The types of vertical link a block can have
