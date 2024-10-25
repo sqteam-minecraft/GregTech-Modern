@@ -88,7 +88,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -335,7 +334,7 @@ public class GTBlocks {
 
         registrate
                 .block("%s_%s_heat_exchanger".formatted(heatPipeMaterial.getName(),
-                                heatPlateMaterial.getName()), ReactorHeatExchanger::new)
+                        heatPlateMaterial.getName()), ReactorHeatExchanger::new)
                 .initialProperties(() -> Blocks.IRON_BLOCK)
                 .properties(p -> {
                     p.sound(GTSoundTypes.METAL_PIPE);

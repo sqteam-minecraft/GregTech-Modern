@@ -573,8 +573,7 @@ public class UnknownCompositionMaterials {
                 .flags(NO_SMELTING)
                 .buildAndRegister();
 
-
-        //ThoriumFissionFuel;
-        //PlutoniumFissionFuel;
+        // ThoriumFissionFuel;
+        // PlutoniumFissionFuel;
     }
 }

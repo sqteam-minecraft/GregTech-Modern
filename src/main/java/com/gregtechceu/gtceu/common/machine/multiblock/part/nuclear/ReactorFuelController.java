@@ -17,6 +17,7 @@ import com.gregtechceu.gtceu.api.machine.multiblock.part.TieredPartMachine;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.common.block.FuelRod;
 
+import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
@@ -68,7 +69,7 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
     public ReactorFuelController(IMachineBlockEntity holder, int tier) {
         super(holder, tier, IO.BOTH);
 
-        this.storage = new ItemStackTransfer();
+        this.storage = new ItemStackTransfer(0);
         storage.setFilter(stack -> {
             if (stack.getItem() instanceof TagPrefixItem tagPrefix && reactor != null) {
                 reactor.updateFuel();
@@ -79,7 +80,7 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
                                     .findFirst().orElse(null));
                     needUpdate = true;
                     return true;
-                } ;
+                }
                 return fuel.getFuel().equals(tagPrefix.material);
             }
             return false;
@@ -198,8 +199,13 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
 
     @Override
     public Widget createUIWidget() {
+        int slots = storage.getSlots();
+
+        if (slots == 0)
+            return new LabelWidget(0, 0, "No valid fuel rods and reactor found");
+
         int width = 8;
-        int height = (storage.getSlots() + 4) / width;
+        int height = (slots + 4) / width;
 
         var group = new WidgetGroup(0, 0, 18 * width + 16 + 8, 18 * height + 16);
         var containerL = new WidgetGroup(4, 4, 18 * width / 2 + 8, 18 * height + 8);

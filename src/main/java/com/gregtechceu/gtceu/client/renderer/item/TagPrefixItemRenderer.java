@@ -6,7 +6,6 @@ import com.gregtechceu.gtceu.api.item.TagPrefixItem;
 import com.gregtechceu.gtceu.data.pack.GTDynamicResourcePack;
 import com.gregtechceu.gtceu.utils.GradientUtil;
 
-import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.models.model.DelegatedModel;
@@ -15,6 +14,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.Item;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.io.InputStream;

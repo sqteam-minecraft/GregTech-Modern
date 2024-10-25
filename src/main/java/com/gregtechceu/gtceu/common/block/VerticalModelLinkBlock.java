@@ -18,6 +18,7 @@ public interface VerticalModelLinkBlock {
 
     /**
      * The vertical link property
+     * 
      * @see Block#registerDefaultState(BlockState)
      * @see Block#createBlockStateDefinition(StateDefinition.Builder)
      */
@@ -25,10 +26,11 @@ public interface VerticalModelLinkBlock {
 
     /**
      * Call this method when the block is placed
-     * @param state the block state of the block
-     * @param level the level the block is in
-     * @param pos the position of the block
-     * @param oldState the old block state
+     * 
+     * @param state         the block state of the block
+     * @param level         the level the block is in
+     * @param pos           the position of the block
+     * @param oldState      the old block state
      * @param movedByPiston whether the block was moved by a piston
      * @see Block#onPlace(BlockState, Level, BlockPos, BlockState, boolean)
      */
@@ -42,16 +44,18 @@ public interface VerticalModelLinkBlock {
 
     /**
      * Call this method when a neighbor block changes
-     * @param state the block state of the block
-     * @param level the level the block is in
-     * @param pos the position of the block
+     * 
+     * @param state         the block state of the block
+     * @param level         the level the block is in
+     * @param pos           the position of the block
      * @param neighborBlock the block that changed
-     * @param neighborPos the position of the neighbor block
+     * @param neighborPos   the position of the neighbor block
      * @param movedByPiston whether the block was moved by a piston
      * @see Block#neighborChanged(BlockState, Level, BlockPos, Block, BlockPos, boolean)
      */
     @SuppressWarnings("deprecation")
-    default void neighborChanged(BlockState state, @NotNull Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+    default void neighborChanged(BlockState state, @NotNull Level level, BlockPos pos, Block neighborBlock,
+                                 BlockPos neighborPos, boolean movedByPiston) {
         if (!level.isClientSide) level.setBlock(pos, state.setValue(V_LINK, retrieveVLinkType(state, level, pos)), 3);
     }
 

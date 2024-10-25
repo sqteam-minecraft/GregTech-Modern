@@ -66,8 +66,10 @@ public class ReactorHeatExchanger extends AppearanceBlock implements SimpleWater
 
     @Override
     @SuppressWarnings("deprecation")
-    public @NotNull BlockState updateShape(BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState,
-                                           @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
+    public @NotNull BlockState updateShape(BlockState state, @NotNull Direction direction,
+                                           @NotNull BlockState neighborState,
+                                           @NotNull LevelAccessor level, @NotNull BlockPos pos,
+                                           @NotNull BlockPos neighborPos) {
         if (state.getValue(BlockStateProperties.WATERLOGGED))
             level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         return super.updateShape(state, direction, neighborState, level, pos, neighborPos);

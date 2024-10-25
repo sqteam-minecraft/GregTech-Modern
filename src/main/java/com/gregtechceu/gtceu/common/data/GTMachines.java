@@ -1158,7 +1158,8 @@ public class GTMachines {
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.REACTOR_REDSTONE_CONTROL)
             .tooltips(Component.translatable("gtceu.universal.disabled"))
-            .renderer(() -> new OverlayTieredMachineRenderer(2, GTCEu.id("block/machine/part/redstone_reactor_control")))
+            .renderer(
+                    () -> new OverlayTieredMachineRenderer(2, GTCEu.id("block/machine/part/redstone_reactor_control")))
             .compassNodeSelf()
             .register();
 
@@ -1174,6 +1175,7 @@ public class GTMachines {
             .register();
 
     private static class ReactorFuelControllerBlock extends MetaMachineBlock implements IReactorFuelConnector {
+
         public ReactorFuelControllerBlock(Properties properties, MachineDefinition definition) {
             super(properties, definition);
         }

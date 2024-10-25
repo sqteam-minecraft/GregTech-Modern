@@ -261,7 +261,10 @@ public class GTModels {
         };
     }
 
-    public static <T extends Block> NonNullBiConsumer<DataGenContext<Block, T>, RegistrateBlockstateProvider> createVerticalModelLinkBlockModel(String name, String path, Class<T> clazz) {
+    public static <
+            T extends Block> NonNullBiConsumer<DataGenContext<Block, T>, RegistrateBlockstateProvider> createVerticalModelLinkBlockModel(String name,
+                                                                                                                                         String path,
+                                                                                                                                         Class<T> clazz) {
         return (ctx, prov) -> {
             AtomicReference<MultiPartBlockStateBuilder> builder = new AtomicReference<>(
                     prov.getMultipartBuilder(ctx.getEntry()));
