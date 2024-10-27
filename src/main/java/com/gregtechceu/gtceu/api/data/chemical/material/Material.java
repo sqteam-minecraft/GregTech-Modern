@@ -43,6 +43,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import static com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey.HAZARD;
 
@@ -675,6 +676,17 @@ public class Material implements Comparable<Material> {
          */
         public Builder dust() {
             properties.ensureSet(PropertyKey.DUST);
+            return this;
+        }
+
+        /**
+         * Add a {@link FissionFuelProperty} to this Material.<br>
+         * Will be created with a Harvest Level of 2 and no Burn Time (Furnace Fuel).
+         *
+         * @throws IllegalArgumentException If a {@link FissionFuelProperty} has already been added to this Material.
+         */
+        public Builder fissionFuel(int baseHeat, Supplier<Material> materialSupplier) {
+            properties.setProperty(PropertyKey.FISSION_FUEL, new FissionFuelProperty(this.materialInfo.resourceLocation.getPath(), materialSupplier, baseHeat));
             return this;
         }
 

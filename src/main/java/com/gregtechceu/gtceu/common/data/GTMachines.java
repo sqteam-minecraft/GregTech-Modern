@@ -8,12 +8,12 @@ import com.gregtechceu.gtceu.api.blockentity.MetaMachineBlockEntity;
 import com.gregtechceu.gtceu.api.capability.IMiner;
 import com.gregtechceu.gtceu.api.capability.compat.FeCompat;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelConnector;
-import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
 import com.gregtechceu.gtceu.api.data.RotationState;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
+import com.gregtechceu.gtceu.api.data.chemical.material.properties.FissionFuelProperty;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.FluidPipeProperties;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
 import com.gregtechceu.gtceu.api.data.medicalcondition.MedicalCondition;
@@ -2073,8 +2073,7 @@ public class GTMachines {
 
     public static final MultiblockMachineDefinition SLOW_NEUTRON_FISSION_REACTOR = REGISTRATE
             .multiblock("slow_neutron_fission_reactor", holder -> new FissionReactorMachine(holder,
-                    FissionReactorType.TIER_1,
-                    new HashSet<>(ReactorFuel.THORIUM.ordinal())))
+                    FissionReactorType.TIER_1, new HashSet<>(FissionFuelProperty.getInstances())))
             .langValue("Slow-Neutron Fission Reactor")
             .rotationState(RotationState.NONE)
             .recipeType(GTRecipeTypes.FISSION_REACTOR_RECIPES)

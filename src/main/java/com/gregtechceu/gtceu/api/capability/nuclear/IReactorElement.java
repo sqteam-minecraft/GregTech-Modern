@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.api.capability.nuclear;
 
 import com.gregtechceu.gtceu.api.machine.feature.nuclear.IFissionReactor;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
@@ -8,17 +9,7 @@ import javax.annotation.Nullable;
  * Implement this interface in order to make a BlockEntity into a block that can be part of a fission reactor
  */
 public interface IReactorElement {
+    int calculateEdgeCapacity(BlockState state, @Nullable IReactorElement to);
 
-    /**
-     * @return the fission reactor the machine is part of
-     */
-    @Nullable
-    IFissionReactor getAssignedReactor();
-
-    /**
-     * Sets the element's fission reactor to the provided one
-     *
-     * @param reactor the fission reactor to assign to this reactor element
-     */
-    void assignToReactor(IFissionReactor reactor);
+    int getHeatThroughput();
 }

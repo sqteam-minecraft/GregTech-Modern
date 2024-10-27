@@ -11,6 +11,8 @@ public class PropertyKey<T extends IMaterialProperty<T>> {
     public static final PropertyKey<FluidProperty> FLUID = new PropertyKey<>("fluid", FluidProperty.class);
     public static final PropertyKey<GemProperty> GEM = new PropertyKey<>("gem", GemProperty.class);
     public static final PropertyKey<IngotProperty> INGOT = new PropertyKey<>("ingot", IngotProperty.class);
+    public static final PropertyKey<FissionFuelProperty> FISSION_FUEL = new PropertyKey<>("fuel_rod",
+            FissionFuelProperty.class);
     public static final PropertyKey<PolymerProperty> POLYMER = new PropertyKey<>("polymer", PolymerProperty.class);
     public static final PropertyKey<ItemPipeProperties> ITEM_PIPE = new PropertyKey<>("item_pipe",
             ItemPipeProperties.class);
@@ -22,6 +24,7 @@ public class PropertyKey<T extends IMaterialProperty<T>> {
 
     public static final PropertyKey<HeatExchangerProperty> HEAT_EXCHANGER = new PropertyKey<>("heat_exchanger_plating",
             HeatExchangerProperty.class);
+
 
     public static final PropertyKey<HazardProperty> HAZARD = new PropertyKey<>("hazard", HazardProperty.class);
 

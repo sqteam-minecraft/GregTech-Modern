@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.common.block;
 
 import com.gregtechceu.gtceu.api.block.AppearanceBlock;
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.core.BlockPos;
@@ -16,10 +17,11 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-public class ReactorHeatVent extends AppearanceBlock implements SimpleWaterloggedBlock {
+public class ReactorHeatVent extends AppearanceBlock implements SimpleWaterloggedBlock, IReactorElement {
     public ReactorHeatVent(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState()
@@ -68,5 +70,16 @@ public class ReactorHeatVent extends AppearanceBlock implements SimpleWaterlogge
             if (tintIndex == 1) return plateColor;
             return -1;
         };
+    }
+
+    @Override
+    public int calculateEdgeCapacity(BlockState state, @Nullable IReactorElement to) {
+        if (to == null) return 0;
+        return Math.min(getHeatThroughput(), to.getHeatThroughput());
+    }
+
+    @Override
+    public int getHeatThroughput() {
+        return 100;
     }
 }

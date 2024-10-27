@@ -1,5 +1,6 @@
 package com.gregtechceu.gtceu.common.block;
 
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.core.BlockPos;
@@ -7,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -47,5 +49,20 @@ public class ReactorHeatExchanger extends ReactorElement {
             case 0b11 -> VLinkTypes.BOTH;
             default -> VLinkTypes.NONE;
         };
+    }
+
+    @Override
+    public int calculateEdgeCapacity(BlockState state, IReactorElement to) {
+        if (to == null) return getMaxHeatToConsume();
+        return 0;
+    }
+
+    private int getMaxHeatToConsume() {
+        return 5;
+    }
+
+    @Override
+    public int getHeatThroughput() {
+        return 10;
     }
 }

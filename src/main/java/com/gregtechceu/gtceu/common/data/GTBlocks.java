@@ -373,7 +373,6 @@ public class GTBlocks {
                 .color(() -> ReactorHeatVent.tintColor(heatPipeMaterial.getLayerARGB(0),
                         heatPlateMaterial.getLayerARGB(0)))
                 .item(BlockItem::new)
-                .model(GTModels.createReactorHeatVentItemModel())
                 .color(() -> ReactorHeatVent.tintItemColor(heatPipeMaterial.getLayerARGB(0),
                         heatPlateMaterial.getLayerARGB(0)))
                 .build()

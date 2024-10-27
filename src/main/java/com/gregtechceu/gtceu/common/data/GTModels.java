@@ -382,12 +382,6 @@ public class GTModels {
         };
     }
 
-    public static NonNullBiConsumer<DataGenContext<Item, BlockItem>, RegistrateItemModelProvider> createReactorHeatVentItemModel() {
-        return (ctx, prov) -> {
-            prov.blockItem(ctx.getEntry()::getBlock);
-        };
-    }
-
     public static NonNullBiConsumer<DataGenContext<Block, FusionCasingBlock>, RegistrateBlockstateProvider> createFusionCasingModel(String name,
                                                                                                                                     IFusionCasingType casingType) {
         return (ctx, prov) -> {

@@ -1,9 +1,7 @@
 package com.gregtechceu.gtceu.common.machine.multiblock.part.nuclear;
 
-import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
-import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelRod;
-import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
+import com.gregtechceu.gtceu.api.data.chemical.material.properties.FissionFuelProperty;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.item.TagPrefixItem;
@@ -36,14 +34,13 @@ import net.minecraft.world.item.ItemStack;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
 import static com.google.common.primitives.Ints.*;
 
 @Slf4j
-public class ReactorFuelController extends TieredIOPartMachine implements IReactorElement, IMachineLife {
+public class ReactorFuelController extends TieredIOPartMachine implements IMachineLife {
 
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ReactorFuelController.class,
             TieredPartMachine.MANAGED_FIELD_HOLDER);
@@ -73,15 +70,16 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
         storage.setFilter(stack -> {
             if (stack.getItem() instanceof TagPrefixItem tagPrefix && reactor != null) {
                 reactor.updateFuel();
-                ReactorFuel fuel = reactor.getFuel();
+                String fuel = reactor.getFuel();
                 if (fuel == null) {
-                    reactor.setFuel(
-                            Arrays.stream(ReactorFuel.values()).filter(f -> f.getFuel().equals(tagPrefix.material))
+                    needUpdate = reactor.setFuel(
+                            FissionFuelProperty.getInstances().stream()
+                                    .filter(f -> f.getFuel().equals(tagPrefix.material))
+                                    .map(FissionFuelProperty::getSerializedName)
                                     .findFirst().orElse(null));
-                    needUpdate = true;
-                    return true;
+                    return needUpdate;
                 }
-                return fuel.getFuel().equals(tagPrefix.material);
+                return FissionFuelProperty.getByName(fuel).getFuel().equals(tagPrefix.material);
             }
             return false;
         });
@@ -132,8 +130,8 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
 
     public void updateFuelRods() {
         if (getLevel() instanceof ServerLevel level && needUpdate && fuelRods != null) {
-            ReactorFuel fuelType = ReactorFuel.URANIUM;
-            if (reactor != null && reactor.getFuel() != null) fuelType = reactor.getFuel();
+            FissionFuelProperty fuelType = FissionFuelProperty.getDefaultValue();
+            if (reactor != null && reactor.getFuel() != null) fuelType = FissionFuelProperty.getByName(reactor.getFuel());
 
             for (int i = 0; i < fuelRods.length; i++) {
                 var blockPos = getPos().relative(Direction.Axis.Y, -i - 1);
@@ -190,7 +188,7 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
         BlockPos pos = getPos();
 
         for (int i = 1; i < 15; i++) {
-            if (level.getBlockState(pos.below(i)).getBlock() instanceof IReactorFuelRod) size++;
+            if (level.getBlockState(pos.below(i)).getBlock() instanceof FuelRod) size++;
             else break;
         }
 
@@ -230,16 +228,5 @@ public class ReactorFuelController extends TieredIOPartMachine implements IReact
         group.addWidget(containerR);
 
         return group;
-    }
-
-    @Nullable
-    @Override
-    public IFissionReactor getAssignedReactor() {
-        return this.reactor;
-    }
-
-    @Override
-    public void assignToReactor(IFissionReactor reactor) {
-        this.reactor = reactor;
     }
 }

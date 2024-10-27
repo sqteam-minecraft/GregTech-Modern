@@ -3,6 +3,7 @@ package com.gregtechceu.gtceu.common.block;
 import com.gregtechceu.gtceu.api.block.AppearanceBlock;
 import com.gregtechceu.gtceu.api.block.VerticalModelLinkBlock;
 
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -17,7 +18,7 @@ import net.minecraft.world.level.material.Fluids;
 
 import org.jetbrains.annotations.NotNull;
 
-public abstract class ReactorElement extends AppearanceBlock implements SimpleWaterloggedBlock, VerticalModelLinkBlock {
+public abstract class ReactorElement extends AppearanceBlock implements SimpleWaterloggedBlock, VerticalModelLinkBlock, IReactorElement {
 
     public ReactorElement(Properties properties) {
         super(properties);

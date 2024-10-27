@@ -1,7 +1,7 @@
 package com.gregtechceu.gtceu.common.machine.multiblock.nuclear;
 
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
-import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
+import com.gregtechceu.gtceu.api.data.chemical.material.properties.FissionFuelProperty;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
@@ -12,6 +12,7 @@ import com.gregtechceu.gtceu.api.machine.feature.nuclear.IFissionReactor;
 import com.gregtechceu.gtceu.api.machine.multiblock.FissionReactorType;
 import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableMultiblockMachine;
+import com.gregtechceu.gtceu.api.nuclear.*;
 import com.gregtechceu.gtceu.api.pattern.BlockPattern;
 import com.gregtechceu.gtceu.api.pattern.FactoryBlockPattern;
 import com.gregtechceu.gtceu.api.pattern.Predicates;
@@ -44,7 +45,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -72,10 +72,10 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     @NotNull
     private final FissionReactorType reactorType;
     @NotNull
-    private Set<ReactorFuel> fuels;
+    private Set<FissionFuelProperty> fuels;
     @Persisted
     @Nullable
-    private ReactorFuel fuel;
+    private String fuel;
     @Persisted
     @Getter
     @Setter
@@ -89,14 +89,15 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     // runtime
     @Getter
     @Nullable
-    private Collection<IReactorElement> reactorElements;
+    private Map<BlockPos, IReactorElement> reactorElements;
     @Persisted
     private int tick = 0;
     private TickableSubscription subscription;
     private ReactorRedstoneControlHatch redstoneControl;
+    private String flows;
 
     public FissionReactorMachine(IMachineBlockEntity holder, @NotNull FissionReactorType reactorType,
-                                 @NotNull Set<ReactorFuel> fuels) {
+                                 @NotNull Set<FissionFuelProperty> fuels) {
         super(holder);
         this.reactorType = reactorType;
         this.fuels = fuels;
@@ -207,20 +208,59 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         initializeAbilities();
 
         if (reactorElements != null) {
-            this.reactorElements.forEach(element -> element.assignToReactor(null));
             this.reactorElements = null;
         }
 
-        this.reactorElements = getMultiblockState().getMatchContext().getOrCreate("reactorElement", Sets::newHashSet);
+        this.reactorElements = getMultiblockState().getMatchContext().getOrCreate("reactorElement", HashMap::new);
+        //Layer baseLayer = structure.getLayer(structure.getZSize() - 1);
+        FlowNetworkResult networkResult = FlowNetwork.buildFlowNetwork(reactorElements, getLevel());
 
-        for (IMultiPart part : getParts()) {
-            if (part instanceof IReactorElement reactorElement) {
-                reactorElement.assignToReactor(this);
 
-                assert reactorElements != null;
-                reactorElements.add(reactorElement);
+        // Create source and sink nodes
+        FlowNetwork network = networkResult.getNetwork();
+        Node source = networkResult.getSource();
+        Node sink = networkResult.getSink();
+
+        // Compute max flow
+        int totalHeatDissipated = MaxFlowCalculator.edmondsKarp(network, source, sink);
+
+        StringBuilder sb = new StringBuilder();
+
+        System.out.println("Maximum Heat Dissipated: " + totalHeatDissipated);
+
+        int totalHeatProduced = 0;
+        for (Map.Entry<BlockPos, IReactorElement> component : reactorElements.entrySet()) {
+            if (component.getValue() instanceof HeatSource heatSource) {
+                totalHeatProduced += heatSource.getHeatProduction(getLevel().getBlockState(component.getKey()));
             }
         }
+        sb.append("Total Heat Produced by FuelRods: ").append(totalHeatProduced).append("\n");
+
+        int heatNotDissipated = totalHeatProduced - totalHeatDissipated;
+        sb.append("Heat Not Dissipated: ").append(heatNotDissipated).append("\n");
+
+        Map<BlockPos, Node> positionNodeMap = networkResult.getPositionNodeMap();
+        // Assuming you've populated positionNodeMap during network construction
+
+        for (Map.Entry<BlockPos, IReactorElement> entry : reactorElements.entrySet()) {
+            BlockPos position = entry.getKey();
+            IReactorElement component = entry.getValue();
+            if (component instanceof HeatSource heatSource) {
+                Node fuelRodNode = positionNodeMap.get(position);
+                int heatProduced = heatSource.getHeatProduction(getLevel().getBlockState(position));
+                int heatTransferred = 0;
+                for (Edge edge : network.getEdges(fuelRodNode)) {
+                    if (edge.getFlow() > 0 && !edge.getTo().equals(source)) {
+                        heatTransferred += edge.getFlow();
+                    }
+                }
+                int heatNotTransferred = heatProduced - heatTransferred;
+                sb.append("FuelRod at ").append(position).append(": Produced = ").append(heatProduced).append(", Transferred = ").append(heatTransferred).append(", Not Transferred = ").append(heatNotTransferred).append("\n");
+            }
+        }
+        sb.append(networkResult.printFlows()).append("\n");
+        // Output the flows
+        this.flows = sb.toString();
     }
 
     @Override
@@ -228,7 +268,6 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         super.onStructureInvalid();
         this.heat = MIN_HEAT;
         if (reactorElements != null) {
-            this.reactorElements.forEach(element -> element.assignToReactor(null));
             this.reactorElements = null;
         }
     }
@@ -448,23 +487,23 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     @NotNull
     protected TraceabilityPredicate innerPredicate() {
         return new TraceabilityPredicate(blockWorldState -> {
-            Set<IReactorElement> elements = blockWorldState.getMatchContext().getOrCreate("reactorElement",
-                    Sets::newHashSet);
+            Map<BlockPos, IReactorElement> elements = blockWorldState.getMatchContext().getOrCreate("reactorElement", HashMap::new);
             BlockState block = blockWorldState.getBlockState();
             if (block.getBlock() == Blocks.AIR) {
                 return true;
             }
-            if (block.getBlock() == GTBlocks.FUEL_ROD.get()) {
+            if (block.getBlock() instanceof IReactorElement element) {
+                elements.put(blockWorldState.getPos(), element);
                 return true;
             }
 
-            // if (blockEntity != null) {
-            // var element = GTCapabilityHelper.getReactorElement(blockWorldState.getWorld(),
-            // blockWorldState.getPos(), null);
-            // if (element != null) {
-            // elements.add(element);
-            // }
-            // }
+//             if (blockEntity != null) {
+//                var element = GTCapabilityHelper.getReactorElement(blockWorldState.getWorld(),
+//                blockWorldState.getPos(), null);
+//                if (element != null) {
+//                    elements.add(element);
+//                }
+//             }
             return false;
         }, null) {
 
@@ -494,11 +533,13 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
                 textList.add(Component.translatable("gtceu.multiblock.idling"));
             }
 
+
             if (recipeLogic.isWaiting()) {
                 textList.add(Component.translatable("gtceu.multiblock.waiting")
                         .setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
             }
             textList.add(Component.translatable("gtceu.multiblock.fission_reactor.heat", this.heat));
+            textList.add(Component.nullToEmpty(this.flows));
         } else {
             Component tooltip = Component.translatable("gtceu.multiblock.invalid_structure.tooltip")
                     .withStyle(ChatFormatting.GRAY);
@@ -525,18 +566,24 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
     }
 
     @Override
-    public void setFuel(@Nullable ReactorFuel fuel) {
-        this.fuel = fuel;
+    public boolean setFuel(@Nullable String fuel) {
+        if (fuels.stream()
+                .map(FissionFuelProperty::getSerializedName)
+                .anyMatch(f -> f.equals(fuel))) {
+            this.fuel = fuel;
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public @Nullable ReactorFuel getFuel() {
+    public @Nullable String getFuel() {
         return this.fuel;
     }
 
     @Override
     public void updateFuel() {
-        boolean isEmpty = this.reactorElements != null && this.reactorElements.stream()
+        boolean isEmpty = this.reactorElements != null && this.getParts().stream()
                 .filter(e -> e instanceof ReactorFuelController)
                 .map(e -> (ReactorFuelController) e)
                 .allMatch(ReactorFuelController::isEmpty);

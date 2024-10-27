@@ -1,6 +1,5 @@
 package com.gregtechceu.gtceu.api.machine.feature.nuclear;
 
-import com.gregtechceu.gtceu.api.capability.nuclear.ReactorFuel;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineFeature;
 import com.gregtechceu.gtceu.api.machine.multiblock.FissionReactorType;
 
@@ -15,10 +14,10 @@ public interface IFissionReactor extends IMachineFeature {
      */
     Set<FissionReactorType> getTypes();
 
-    void setFuel(@Nullable ReactorFuel fuel);
+    boolean setFuel(@Nullable String fuel);
 
     @Nullable
-    ReactorFuel getFuel();
+    String getFuel();
 
     void updateFuel();
 }

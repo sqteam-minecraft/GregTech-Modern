@@ -10,7 +10,7 @@ import java.util.*;
 public class MaterialProperties {
 
     private static final Set<PropertyKey<?>> baseTypes = new HashSet<>(Arrays.asList(
-            PropertyKey.FLUID, PropertyKey.DUST,
+            PropertyKey.FLUID, PropertyKey.DUST, PropertyKey.FISSION_FUEL,
             PropertyKey.INGOT, PropertyKey.GEM, PropertyKey.EMPTY));
 
     @SuppressWarnings("unused")
