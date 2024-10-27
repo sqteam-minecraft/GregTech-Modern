@@ -304,8 +304,8 @@ public class GTBlocks {
         CABLE_BLOCKS_BUILDER.put(insulation.tagPrefix, material, entry);
     }
 
-    private static void generateHeatExchangerBlocks() {
-        GTCEu.LOGGER.debug("Generating GTCEu Heat Exchanger Blocks...");
+    private static void generateHeatVentAndExchangerBlocks() {
+        GTCEu.LOGGER.debug("Generating GTCEu Heat Vent And Heat Exchanger Blocks...");
         Map<Material, GTRegistrate> heatPipeMaterials = new HashMap<>();
         Map<Material, GTRegistrate> heatPlateMaterials = new HashMap<>();
 
@@ -324,14 +324,17 @@ public class GTBlocks {
         heatPipeMaterials.forEach((heatPipeMaterial, r) -> {
             heatPlateMaterials.forEach((heatPlateMaterial, r1) -> {
                 registerHeatExchangerBlock(heatPipeMaterial, heatPlateMaterial, r);
+                registerHeatVentBlock(heatPipeMaterial, heatPlateMaterial, r);
             });
         });
     }
 
+    private static String capitalize(String s) {
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+
     private static void registerHeatExchangerBlock(Material heatPipeMaterial, Material heatPlateMaterial,
                                                    GTRegistrate registrate) {
-        Function<String, String> capitalize = s -> s.substring(0, 1).toUpperCase() + s.substring(1);
-
         registrate
                 .block("%s_%s_heat_exchanger".formatted(heatPipeMaterial.getName(),
                         heatPlateMaterial.getName()), ReactorHeatExchanger::new)
@@ -340,14 +343,38 @@ public class GTBlocks {
                     p.sound(GTSoundTypes.METAL_PIPE);
                     return p.noOcclusion();
                 })
-                .lang("%s-%s Heat Exchanger".formatted(capitalize.apply(heatPipeMaterial.getName()),
-                        capitalize.apply(heatPlateMaterial.getName())))
+                .lang("%s-%s Heat Exchanger".formatted(capitalize(heatPipeMaterial.getName()),
+                        capitalize(heatPlateMaterial.getName())))
                 .blockstate(GTModels.createVerticalModelLinkBlockModel("reactor_heat_exchanger",
                         "nuclear/", ReactorHeatExchanger.class))
                 .color(() -> ReactorHeatExchanger.tintColor(heatPipeMaterial.getLayerARGB(0),
                         heatPlateMaterial.getLayerARGB(0)))
                 .item(BlockItem::new)
                 .color(() -> ReactorHeatExchanger.tintItemColor(heatPipeMaterial.getLayerARGB(0),
+                        heatPlateMaterial.getLayerARGB(0)))
+                .build()
+                .register();
+    }
+
+    private static void registerHeatVentBlock(Material heatPipeMaterial, Material heatPlateMaterial,
+                                                   GTRegistrate registrate) {
+        registrate
+                .block("%s_%s_heat_vent".formatted(heatPipeMaterial.getName(),
+                        heatPlateMaterial.getName()), ReactorHeatVent::new)
+                .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> {
+                    p.sound(GTSoundTypes.METAL_PIPE);
+                    return p.noOcclusion();
+                })
+                .lang("%s-%s Heat Vent".formatted(capitalize(heatPipeMaterial.getName()),
+                        capitalize(heatPlateMaterial.getName())))
+                .blockstate(GTModels.createReactorHeatVentModel("reactor_heat_vent",
+                        "nuclear/"))
+                .color(() -> ReactorHeatVent.tintColor(heatPipeMaterial.getLayerARGB(0),
+                        heatPlateMaterial.getLayerARGB(0)))
+                .item(BlockItem::new)
+                .model(GTModels.createReactorHeatVentItemModel())
+                .color(() -> ReactorHeatVent.tintItemColor(heatPipeMaterial.getLayerARGB(0),
                         heatPlateMaterial.getLayerARGB(0)))
                 .build()
                 .register();
@@ -1779,7 +1806,7 @@ public class GTBlocks {
         generateLaserPipeBlocks();     // Laser Pipe Blocks
         generateOpticalPipeBlocks();   // Optical Pipe Blocks
         generateDuctPipeBlocks();      // Duct Pipe Blocks
-        generateHeatExchangerBlocks(); // Heat Exchanger Blocks
+        generateHeatVentAndExchangerBlocks(); // Heat Exchanger Blocks
 
         // Remove Builder Tables
         MATERIAL_BLOCKS_BUILDER = null;

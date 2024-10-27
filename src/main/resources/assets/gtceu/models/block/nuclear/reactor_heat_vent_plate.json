@@ -1,0 +1,96 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"1": "gtceu:block/nuclear/reactor_heat_vent_plate",
+		"particle": "gtceu:block/nuclear/reactor_heat_vent_plate"
+	},
+	"elements": [
+		{
+			"name": "plate_top",
+			"from": [0, 10, 0],
+			"to": [4, 11, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [4, 0, 5, 4], "rotation": 270, "texture": "#1",
+					"tintindex": 1
+				},
+				"east": {"uv": [6, 0, 5, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"south": {"uv": [4, 0, 5, 4], "rotation": 270, "texture": "#1",
+					"tintindex": 1
+				},
+				"west": {"uv": [5, 0, 6, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"up": {"uv": [0, 0, 4, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"down": {"uv": [0, 0, 4, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				}
+			}
+		},
+		{
+			"name": "plate_mid",
+			"from": [0, 7, 0],
+			"to": [4, 9, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [4, 0, 6, 4], "rotation": 270, "texture": "#1",
+					"tintindex": 1
+				},
+				"east": {"uv": [6, 0, 4, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"south": {"uv": [4, 0, 6, 4], "rotation": 270, "texture": "#1",
+					"tintindex": 1
+				},
+				"west": {"uv": [6, 0, 4, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"up": {"uv": [0, 0, 4, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"down": {"uv": [0, 0, 4, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				}
+			}
+		},
+		{
+			"name": "plate_bot",
+			"from": [0, 5, 0],
+			"to": [4, 6, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 3, 8]},
+			"faces": {
+				"north": {"uv": [4, 0, 5, 4], "rotation": 270, "texture": "#1",
+					"tintindex": 1
+				},
+				"east": {"uv": [6, 0, 5, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"south": {"uv": [4, 0, 5, 4], "rotation": 270, "texture": "#1",
+					"tintindex": 1
+				},
+				"west": {"uv": [5, 0, 6, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"up": {"uv": [0, 0, 4, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				},
+				"down": {"uv": [0, 0, 4, 4], "rotation": 90, "texture": "#1",
+					"tintindex": 1
+				}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "plates",
+			"origin": [0, 0, 5],
+			"color": 0,
+			"children": [0, 1, 2]
+		}
+	]
+}

@@ -14,6 +14,7 @@ import com.gregtechceu.gtceu.core.MixinHelpers;
 import com.gregtechceu.gtceu.data.pack.GTDynamicResourcePack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -334,6 +335,56 @@ public class GTModels {
                     }
                 }
             });
+        };
+    }
+
+    public static NonNullBiConsumer<DataGenContext<Block, ReactorHeatVent>, RegistrateBlockstateProvider> createReactorHeatVentModel(String name, String path) {
+        return (ctx, prov) -> {
+            MultiPartBlockStateBuilder builder = prov.getMultipartBuilder(ctx.getEntry());
+
+            ModelFile parentBase = prov.models().getExistingFile(prov.modLoc("block/" + path + name));
+            ModelBuilder<?> modelBase = prov.models()
+                    .getBuilder(ctx.getName())
+                    .parent(parentBase);
+            ModelFile parentLink = prov.models()
+                    .getExistingFile(prov.modLoc("block/" + path + name + "_link"));
+            ModelBuilder<?> modelLink = prov.models()
+                    .getBuilder(ctx.getName() + "_link")
+                    .parent(parentLink);
+            ModelFile parentPlate = prov.models()
+                    .getExistingFile(prov.modLoc("block/" + path + name + "_plate"));
+            ModelBuilder<?> modelPlate = prov.models()
+                    .getBuilder(ctx.getName() + "_plate")
+                    .parent(parentPlate);
+            ModelFile parentPlug = prov.models()
+                    .getExistingFile(prov.modLoc("block/" + path + name + "_plug"));
+            ModelBuilder<?> modelPlug = prov.models()
+                    .getBuilder(ctx.getName() + "_plug")
+                    .parent(parentPlug);
+
+            builder = builder.part()
+                    .modelFile(modelBase)
+                    .addModel()
+                    .end();
+
+            for (Direction direction : Direction.Plane.HORIZONTAL) {
+                int angle = 90 * (direction.ordinal() - 2);
+                builder = builder.part()
+                        .modelFile(modelLink)
+                        .rotationY(angle)
+                        .addModel()
+                        .end().part()
+                        .modelFile(modelPlate)
+                        .rotationY(angle)
+                        .addModel()
+                        .end();
+            }
+        };
+    }
+
+    public static NonNullBiConsumer<DataGenContext<Item, BlockItem>, RegistrateItemModelProvider> createReactorHeatVentItemModel() {
+        return (ctx, prov) -> {
+            prov.blockItem(ctx.getEntry()::getBlock);
         };
     }
 
