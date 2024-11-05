@@ -96,7 +96,6 @@ public class ReactorHeatVentModel {
 
     /**
      * Get the rotation matrix for the given rotation
-     * @param axis the axis of rotation
      * @param rotation the rotation in degrees
      * @return the rotation matrix
      */

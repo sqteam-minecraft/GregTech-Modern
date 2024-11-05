@@ -17,10 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public record ReactorHeatVentRenderer(ReactorHeatVentModel model) implements IRenderer {
     public ReactorHeatVentRenderer(ReactorHeatVentModel model) {
@@ -52,13 +49,18 @@ public record ReactorHeatVentRenderer(ReactorHeatVentModel model) implements IRe
         List<Direction> plane = Arrays.stream(Direction.values())
                 .filter(d -> d.getAxis() != axis)
                 .toList();
-
+        System.out.println(System.currentTimeMillis() + ":" + plane + " -> " + axis);
+        Map<Direction, Vec3i> debug = new HashMap<>();
         plane.forEach(d -> {
-                //Vec3i rotation = new Vec3i(axis == Direction.Axis.Z ? 90 : 0,
-                //        getModelYRot(d), axis == Direction.Axis.X ? 90 : 0);
-            Vec3i rotation = new Vec3i(axis == Direction.Axis.Z ? 90 : 0, getModelYRot(d), axis == Direction.Axis.X ? 90 : 0);
-                if (level.getBlockState(pos.relative(d)).getBlock() instanceof ReactorElement) {
+//                new Vec3i(axis == Direction.Axis.Z ? 90 : 0, getModelYRot(d), axis == Direction.Axis.X ? 90 : 0);
+                Vec3i rotation = switch (d) {
+                    case UP    -> new Vec3i(90, 0, 0);
+                    case DOWN  -> new Vec3i(270,0, 0);
+                    default    -> new Vec3i(0, getModelYRot(d), 0);
+                };
 
+                if (level.getBlockState(pos.relative(d)).getBlock() instanceof ReactorElement) {
+                    debug.put(d, rotation);
                     bakedModelLink.add(this.model.getLink(level, rotation));
                     if (level.getBlockState(pos.relative(d.getCounterClockWise(axis))).getBlock()
                             instanceof ReactorElement)
@@ -66,22 +68,23 @@ public record ReactorHeatVentRenderer(ReactorHeatVentModel model) implements IRe
                 }
                 else bakedModelPlug.add(this.model.getPlug(level, rotation));
         });
+        System.out.println(System.currentTimeMillis() + ":" + plane + " -> " + axis + " -> " + debug);
 
         List<BakedQuad> quads = new ArrayList<>();
 
         quads.addAll(bakedModelCore.getQuads(state, side, rand));
-//        quads.addAll(bakedModelPlate.stream()
-//                .map(e -> e.getQuads(state, side, rand))
-//                .flatMap(Collection::stream)
-//                .toList());
+        quads.addAll(bakedModelPlate.stream()
+                .map(e -> e.getQuads(state, side, rand))
+                .flatMap(Collection::stream)
+                .toList());
         quads.addAll(bakedModelLink.stream()
                 .map(e -> e.getQuads(state, side, rand))
                 .flatMap(Collection::stream)
                 .toList());
-//        quads.addAll(bakedModelPlug.stream()
-//                .map(e -> e.getQuads(state, side, rand))
-//                .flatMap(Collection::stream)
-//                .toList());
+        quads.addAll(bakedModelPlug.stream()
+                .map(e -> e.getQuads(state, side, rand))
+                .flatMap(Collection::stream)
+                .toList());
         return quads;
     }
 
