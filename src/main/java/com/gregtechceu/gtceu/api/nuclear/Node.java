@@ -2,20 +2,7 @@ package com.gregtechceu.gtceu.api.nuclear;
 
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 
-public class Node {
-    private String id;
-    private IReactorElement component;
-
-    public Node(String id, IReactorElement component) {
-        this.id = id;
-        this.component = component;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public IReactorElement getComponent() {
-        return component;
-    }
-}
+/**
+ * Represents a node in the flow network, identified by an ID and optionally linked to a reactor element.
+ */
+public record Node(String id, IReactorElement component) {}

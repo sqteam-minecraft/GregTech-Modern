@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.common.block;
 
 import com.gregtechceu.gtceu.api.block.AppearanceBlock;
+import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import com.gregtechceu.gtceu.client.model.ReactorHeatVentModel;
 import com.gregtechceu.gtceu.client.renderer.block.ReactorHeatVentRenderer;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
@@ -9,7 +10,9 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -26,9 +29,13 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
-public class ReactorHeatVent extends AppearanceBlock implements SimpleWaterloggedBlock, IBlockRendererProvider {
+public class ReactorHeatVent extends AppearanceBlock implements SimpleWaterloggedBlock, IBlockRendererProvider,
+        IReactorElement {
 
     public static final EnumProperty<Direction.Axis> AXIS = EnumProperty.create("axis", Direction.Axis.class);
 
@@ -116,5 +123,41 @@ public class ReactorHeatVent extends AppearanceBlock implements SimpleWaterlogge
     @Override
     public IRenderer getRenderer(BlockState state) {
         return renderer;
+    }
+
+    @Override
+    public int calculateEdgeCapacity(BlockState state, @Nullable IReactorElement to) {
+        if (to == null) return 0;
+        return Math.min(getHeatThroughput(), to.getHeatThroughput());
+    }
+
+    @Override
+    public int getHeatThroughput() {
+        return 30;
+    }
+
+    @Override
+    @NotNull
+    public List<BlockPos> getNetworkNeighbors(Map<BlockPos, IReactorElement> structure, BlockPos position, Level level) {
+        List<BlockPos> neighbors = new ArrayList<>();
+        Direction.Axis placementAxis = level.getBlockState(position).getValue(AXIS);
+
+        int x = position.getX();
+        int y = position.getY();
+        int z = position.getZ();
+
+        // Check all possible adjacent directions.
+        for (Direction dir : Direction.values()) {
+            Vec3i axis = dir.getNormal();
+
+            if (dir.getAxis() == placementAxis) continue;
+
+            BlockPos neighborPos = new BlockPos(x + axis.getX(), y + axis.getY(), z + axis.getZ());
+            if (structure.containsKey(neighborPos)) {
+                neighbors.add(neighborPos);
+            }
+        }
+
+        return neighbors;
     }
 }

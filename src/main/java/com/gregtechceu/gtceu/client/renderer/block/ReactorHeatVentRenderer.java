@@ -74,7 +74,10 @@ public record ReactorHeatVentRenderer(ReactorHeatVentModel model) implements IRe
                 bakedModelLink.add(this.model.getLink(level, rotation));
 
                 // Check for adjacent ReactorElement for the plate model
-                BlockPos platePos = pos.relative(direction.getCounterClockWise(axis));
+                BlockPos platePos = pos.relative(state
+                        .getValue(ReactorHeatVent.AXIS) == Direction.Axis.X ?
+                        direction.getClockWise(axis) :
+                        direction.getCounterClockWise(axis));
                 if (level.getBlockState(platePos).getBlock() instanceof ReactorElement) {
                     bakedModelPlate.add(this.model.getPlates(level, rotation));
                 }
@@ -130,6 +133,8 @@ public record ReactorHeatVentRenderer(ReactorHeatVentModel model) implements IRe
         Matrix4f matrix = new Matrix4f().identity();
         matrix.translate(0.5f, 0.5f, 0.5f);
 
+        // TODO: clean up this switch statement - make building matrix procedural
+
         switch (axis) {
             case Y -> {
                 int angle = getModelYRot(direction);
@@ -149,7 +154,7 @@ public record ReactorHeatVentRenderer(ReactorHeatVentModel model) implements IRe
                     case UP -> matrix.rotateAffineXYZ(0.5f * Mth.PI, 0, 0.5f * Mth.PI);
                     case SOUTH -> matrix.rotateAffineXYZ(0, Mth.PI, 1.5f * Mth.PI);
                     case DOWN -> matrix.rotateAffineYXZ(0.5f * Mth.PI, 1.5f * Mth.PI, 0);
-                    case NORTH -> matrix.rotateAffineZYX(0.5f * Mth.PI, 0, 0);
+                    case NORTH -> matrix.rotateAffineXYZ(0, 0, 0.5f * Mth.PI);
                     default -> throw new IllegalStateException("Unexpected value: " + direction);
                 }
             }

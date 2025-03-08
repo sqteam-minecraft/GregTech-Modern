@@ -18,7 +18,8 @@ import net.minecraft.world.level.material.Fluids;
 
 import org.jetbrains.annotations.NotNull;
 
-public abstract class ReactorElement extends AppearanceBlock implements SimpleWaterloggedBlock, VerticalModelLinkBlock, IReactorElement {
+public abstract class ReactorElement extends AppearanceBlock implements SimpleWaterloggedBlock, VerticalModelLinkBlock,
+        IReactorElement {
 
     public ReactorElement(Properties properties) {
         super(properties);

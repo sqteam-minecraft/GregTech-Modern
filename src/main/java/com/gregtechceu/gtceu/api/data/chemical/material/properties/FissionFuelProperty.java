@@ -1,21 +1,21 @@
 package com.gregtechceu.gtceu.api.data.chemical.material.properties;
 
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
-import com.lowdragmc.lowdraglib.syncdata.IManaged;
-import lombok.Getter;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Supplier;
 
-public class FissionFuelProperty implements IMaterialProperty<FissionFuelProperty>, StringRepresentable, Comparable<FissionFuelProperty> {
+public class FissionFuelProperty implements IMaterialProperty<FissionFuelProperty>, StringRepresentable,
+        Comparable<FissionFuelProperty> {
 
     private static final Map<String, FissionFuelProperty> INSTANCES = new HashMap<>();
 
     private final Supplier<Material> fuel;
     private final int heat;
     private final String name;
+
     public FissionFuelProperty(String name, Supplier<Material> fuel, int heat) {
         this.fuel = fuel;
         this.heat = heat;
@@ -24,7 +24,7 @@ public class FissionFuelProperty implements IMaterialProperty<FissionFuelPropert
     }
 
     public static Collection<FissionFuelProperty> getInstances() {
-        return Collections.unmodifiableSet(new HashSet<>(INSTANCES.values()));
+        return Set.copyOf(INSTANCES.values());
     }
 
     public static FissionFuelProperty getDefaultValue(){
@@ -59,5 +59,4 @@ public class FissionFuelProperty implements IMaterialProperty<FissionFuelPropert
     public Material getFuel(){
         return fuel.get();
     }
-
 }

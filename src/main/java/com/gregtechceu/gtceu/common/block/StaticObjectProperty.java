@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class StaticObjectProperty<T extends StringRepresentable & Comparable<T>> extends Property<T> {
     private final ImmutableSet<T> values;
     private final Map<String, T> nameToValueMap;
+
     protected StaticObjectProperty(String name, Class<T> clazz, Collection<T> values) {
         super(name, clazz);
         this.values = ImmutableSet.copyOf(values);

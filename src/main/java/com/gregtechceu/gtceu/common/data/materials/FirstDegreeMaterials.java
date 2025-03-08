@@ -1224,21 +1224,21 @@ public class FirstDegreeMaterials {
                 .buildAndRegister();
 
         UraniumFissionFuel = new Material.Builder(GTCEu.id("uranium_fission_fuel"))
-                .fissionFuel(10, ()->UraniumFissionFuel)
+                .fissionFuel(10, () -> UraniumFissionFuel)
                 .color(0x42D126).secondaryColor(0xFEFEFE)
                 .flags(DISABLE_DECOMPOSITION, GENERATE_FUEL_ROD)
                 .components(Uranium235, 1, Uranium238, 1, Oxygen, 4)
                 .buildAndRegister();
 
         PlutoniumFissionFuel = new Material.Builder(GTCEu.id("plutonium_fission_fuel"))
-                .fissionFuel(20, ()->PlutoniumFissionFuel)
+                .fissionFuel(20, () -> PlutoniumFissionFuel)
                 .color(0xD12626).secondaryColor(0xFEFEFE)
                 .flags(DISABLE_DECOMPOSITION, GENERATE_FUEL_ROD)
                 .components(Plutonium239, 1, Oxygen, 2)
                 .buildAndRegister();
 
         ThoriumFissionFuel = new Material.Builder(GTCEu.id("thorium_fission_fuel"))
-                .fissionFuel(5, ()->ThoriumFissionFuel)
+                .fissionFuel(5, () -> ThoriumFissionFuel)
                 .color(0x1A1A1A).secondaryColor(0xFEFEFE)
                 .flags(DISABLE_DECOMPOSITION, GENERATE_FUEL_ROD)
                 .components(Thorium, 1, Oxygen, 4)

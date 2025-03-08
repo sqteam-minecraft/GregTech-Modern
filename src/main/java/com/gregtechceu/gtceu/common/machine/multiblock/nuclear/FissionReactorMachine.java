@@ -217,9 +217,9 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
 
 
         // Create source and sink nodes
-        FlowNetwork network = networkResult.getNetwork();
-        Node source = networkResult.getSource();
-        Node sink = networkResult.getSink();
+        FlowNetwork network = networkResult.network();
+        Node source = networkResult.source();
+        Node sink = networkResult.sink();
 
         // Compute max flow
         int totalHeatDissipated = MaxFlowCalculator.edmondsKarp(network, source, sink);
@@ -239,7 +239,7 @@ public class FissionReactorMachine extends WorkableMultiblockMachine
         int heatNotDissipated = totalHeatProduced - totalHeatDissipated;
         sb.append("Heat Not Dissipated: ").append(heatNotDissipated).append("\n");
 
-        Map<BlockPos, Node> positionNodeMap = networkResult.getPositionNodeMap();
+        Map<BlockPos, Node> positionNodeMap = networkResult.positionNodeMap();
         // Assuming you've populated positionNodeMap during network construction
 
         for (Map.Entry<BlockPos, IReactorElement> entry : reactorElements.entrySet()) {

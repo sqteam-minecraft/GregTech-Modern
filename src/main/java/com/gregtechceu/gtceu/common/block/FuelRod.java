@@ -4,9 +4,7 @@ import com.gregtechceu.gtceu.api.capability.nuclear.IReactorElement;
 import com.gregtechceu.gtceu.api.capability.nuclear.IReactorFuelConnector;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.FissionFuelProperty;
 import com.gregtechceu.gtceu.api.machine.feature.nuclear.IFissionReactor;
-
 import com.gregtechceu.gtceu.api.nuclear.HeatSource;
-
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -16,17 +14,46 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A fuel rod block that acts as a reactor element and a fuel connector while also serving as a heat source.
+ * It calculates its heat production based on a 2x2 cell grid where each cell stores a rod count,
+ * with bonus multipliers based on interactions between adjacent cells.
+ */
 public class FuelRod extends ReactorElement implements IReactorFuelConnector, HeatSource {
 
     @Nullable
     private IFissionReactor reactor;
 
-    //public static final EnumProperty<ReactorFuel> FUEL_TYPE = EnumProperty.create("fuel", ReactorFuel.class);
-    public static final StaticObjectProperty<FissionFuelProperty> FUEL_TYPE = StaticObjectProperty.create("fuel", FissionFuelProperty.class, FissionFuelProperty.getInstances());
-    public static final IntegerProperty RODS = IntegerProperty.create("rods", 0, 0xFF);
+    // Constants for encoding rod counts in a 2x2 grid.
+    private static final int NUM_CELLS = 4;
+    private static final int BITS_PER_CELL = 2;
+    private static final int CELL_MASK = (1 << BITS_PER_CELL) - 1;  // 0b11 equals 3
+    private static final int MAX_RODS_STATE = (1 << (BITS_PER_CELL * NUM_CELLS)) - 1;  // 255 (0xFF)
+
+    public static final StaticObjectProperty<FissionFuelProperty> FUEL_TYPE =
+            StaticObjectProperty.create("fuel", FissionFuelProperty.class, FissionFuelProperty.getInstances());
+    public static final IntegerProperty RODS = IntegerProperty.create("rods", 0, MAX_RODS_STATE);
+
+    // Base heat multipliers per rod count (0, 1, 2, or 3 rods in a cell).
+    private static final double[] HEAT_MULTIPLIERS = {0.0, 1.0, 2.5, 6.0};
+
+    // Bonus interaction matrix: bonus = INTERACTION_MATRIX[currentCellRodCount][neighborCellRodCount].
+    private static final double[][] INTERACTION_MATRIX = {
+            {0.0,  0.0,   0.0,   0.0},
+            {0.0,  0.05,  0.10,  0.25},
+            {0.0,  0.10,  0.15,  0.30},
+            {0.0,  0.25,  0.30,  0.45}
+    };
+
+    // Predefined neighbor indices for each cell in a 2x2 grid.
+    private static final int[][] NEIGHBOR_INDICES = {
+            {1, 2},  // Neighbors for cell 0.
+            {0, 3},  // Neighbors for cell 1.
+            {0, 3},  // Neighbors for cell 2.
+            {1, 2}   // Neighbors for cell 3.
+    };
 
     public FuelRod(Properties properties) {
         super(properties);
@@ -35,11 +62,16 @@ public class FuelRod extends ReactorElement implements IReactorFuelConnector, He
                 .setValue(FUEL_TYPE, FissionFuelProperty.getDefaultValue()));
     }
 
+    /**
+     * Provides the tint color for the fuel rod block on the client.
+     *
+     * @return A {@code BlockColor} that applies the fuel type's color.
+     */
     @OnlyIn(Dist.CLIENT)
     public static BlockColor tintColor() {
         return (state, reader, pos, tintIndex) -> {
-            if (state.getBlock() instanceof FuelRod) {
-                if (tintIndex == 0) return state.getValue(FUEL_TYPE).getFuel().getLayerARGB(0);
+            if (state.getBlock() instanceof FuelRod && tintIndex == 0) {
+                return state.getValue(FUEL_TYPE).getFuel().getLayerARGB(0);
             }
             return -1;
         };
@@ -51,12 +83,22 @@ public class FuelRod extends ReactorElement implements IReactorFuelConnector, He
         builder.add(RODS, FUEL_TYPE);
     }
 
+    /**
+     * Determines the vertical link type for fuel connectors by checking adjacent blocks.
+     * Combines the presence of connectors above and below into a connection code.
+     *
+     * @param state The current block state.
+     * @param level The level containing the block.
+     * @param pos   The block position.
+     * @return The vertical link type.
+     */
     @Override
     public VLinkTypes retrieveVLinkType(BlockState state, Level level, BlockPos pos) {
-        int hasBlockAbove = (level.getBlockState(pos.above()).getBlock() instanceof IReactorFuelConnector) ? 1 : 0;
-        int hasBlockBelow = (level.getBlockState(pos.below()).getBlock() instanceof IReactorFuelConnector) ? 1 : 0;
+        int hasAbove = (level.getBlockState(pos.above()).getBlock() instanceof IReactorFuelConnector) ? 1 : 0;
+        int hasBelow = (level.getBlockState(pos.below()).getBlock() instanceof IReactorFuelConnector) ? 1 : 0;
+        int connectionCode = (hasAbove << 1) | hasBelow;  // Bit 1: above, Bit 0: below
 
-        return switch (hasBlockAbove << 1 | hasBlockBelow) {
+        return switch (connectionCode) {
             case 0b01 -> VLinkTypes.DOWN;
             case 0b10 -> VLinkTypes.UP;
             case 0b11 -> VLinkTypes.BOTH;
@@ -64,6 +106,14 @@ public class FuelRod extends ReactorElement implements IReactorFuelConnector, He
         };
     }
 
+    /**
+     * Calculates the edge capacity between this reactor element and another.
+     * The capacity is the minimum of this element's heat production and the other's throughput.
+     *
+     * @param state The current block state.
+     * @param to    The target reactor element.
+     * @return The edge capacity.
+     */
     @Override
     public int calculateEdgeCapacity(BlockState state, IReactorElement to) {
         if (to == null) return 0;
@@ -75,90 +125,57 @@ public class FuelRod extends ReactorElement implements IReactorFuelConnector, He
         return 0;
     }
 
-    // Constants for heat multipliers based on rod count
-    private static final double[] HEAT_MULTIPLIERS = {0.0, 1.0, 2.5, 6.0}; // Index corresponds to rod count
-
-    // Constant interaction matrix for bonuses between rod counts
-    private static final double[][] INTERACTION_MATRIX = {
-            // Neighbor rod counts: 0,    1,      2,      3
-            /* rodsInCell = 0 */ {0.0,  0.0,    0.0,    0.0},    // 0 rods in cell
-            /* rodsInCell = 1 */ {0.0,  0.05,   0.10,   0.25},   // 1 rod in cell
-            /* rodsInCell = 2 */ {0.0,  0.10,   0.15,   0.30},   // 2 rods in cell
-            /* rodsInCell = 3 */ {0.0,  0.25,   0.30,   0.45}    // 3 (4 rods) in cell
-    };
-
-
+    /**
+     * Calculates the total heat production based on the current fuel rod state.
+     * <p>
+     * The fuel rod is divided into a 2x2 grid of cells. Each cell's rod count is stored in 2 bits.
+     * For each cell, base heat is computed by multiplying the fuel's base production with a multiplier
+     * corresponding to the rod count. A bonus is then applied based on the interaction with neighboring cells.
+     * </p>
+     *
+     * @param state The block state.
+     * @return The total heat production as an integer.
+     */
     @Override
     public int getHeatProduction(BlockState state) {
         int rodsState = state.getValue(RODS);
-        int fuelTypeBaseProduction = state.getValue(FUEL_TYPE).getHeatProduces();
+        int baseProduction = state.getValue(FUEL_TYPE).getHeatProduces();
 
-        // Arrays to hold base heat and rod counts for each cell
-        double[] baseHeat = new double[4];
-        int[] rodsInCells = new int[4];
+        double[] baseHeat = new double[NUM_CELLS];
+        int[] rodsInCells = new int[NUM_CELLS];
 
-        // Calculate base heat and construct the rod count vector
-        for (int i = 0; i < 4; i++) {
-            int rodsInCell = (rodsState >> (i * 2)) & 0b11;
-            rodsInCells[i] = rodsInCell;
-
-            double cellMultiplier = HEAT_MULTIPLIERS[rodsInCell];
-            baseHeat[i] = fuelTypeBaseProduction * cellMultiplier;
+        // Decode rod counts from the state (each cell uses 2 bits).
+        for (int cell = 0; cell < NUM_CELLS; cell++) {
+            int rodCount = (rodsState >> (cell * BITS_PER_CELL)) & CELL_MASK;
+            rodsInCells[cell] = rodCount;
+            baseHeat[cell] = baseProduction * HEAT_MULTIPLIERS[rodCount];
         }
 
-        // Calculate bonuses using matrix multiplication
+        // Calculate total heat with bonus from neighboring interactions.
         double totalHeat = 0.0;
-        for (int i = 0; i < 4; i++) {
-            double cellHeat = baseHeat[i];
-
-            // Get the indices of the neighboring cells
-            int[] neighbors = getNeighbors(i);
-
-            // Construct the rod count vector for the neighbors
-            int[] neighborRodCounts = new int[neighbors.length];
-            for (int j = 0; j < neighbors.length; j++) {
-                neighborRodCounts[j] = rodsInCells[neighbors[j]];
-            }
-
-            // Calculate the bonus for this cell
-            double bonus = calculateBonus(rodsInCells[i], neighborRodCounts);
-
-            // Adjust the cell heat with the bonus
-            cellHeat += cellHeat * bonus;
-
-            // Add to total heat
-            totalHeat += cellHeat;
+        for (int cell = 0; cell < NUM_CELLS; cell++) {
+            double cellHeat = baseHeat[cell];
+            double bonus = calculateBonus(rodsInCells[cell], NEIGHBOR_INDICES[cell], rodsInCells);
+            totalHeat += cellHeat * (1.0 + bonus);
         }
 
         return (int) totalHeat;
     }
 
     /**
-     * Returns the indices of neighboring cells for a given cell index.
+     * Calculates the bonus multiplier for a cell based on its rod count and that of its neighbors.
+     *
+     * @param rodsInCell      The rod count in the current cell.
+     * @param neighborIndices The indices of neighboring cells.
+     * @param rodsInCells     The array containing rod counts for all cells.
+     * @return The bonus multiplier.
      */
-    private int[] getNeighbors(int cellIndex) {
-        // Define neighbor pairs for each cell (cells are in a 2x2 grid)
-        return switch (cellIndex) {
-            case 0 -> new int[]{1, 2}; // Cell 0 neighbors: Cell 1 and Cell 2
-            case 1 -> new int[]{0, 3}; // Cell 1 neighbors: Cell 0 and Cell 3
-            case 2 -> new int[]{0, 3}; // Cell 2 neighbors: Cell 0 and Cell 3
-            case 3 -> new int[]{1, 2}; // Cell 3 neighbors: Cell 1 and Cell 2
-            default -> new int[]{};
-        };
-    }
-
-    /**
-     * Calculates the bonus for a cell based on its rod count and the rod counts of its neighbors.
-     */
-    private double calculateBonus(int rodsInCell, int[] neighborRodCounts) {
+    private double calculateBonus(int rodsInCell, int[] neighborIndices, int[] rodsInCells) {
         double bonus = 0.0;
-
-        for (int rodsInNeighbor : neighborRodCounts) {
-            // Use the interaction matrix to get the bonus coefficient
-            double bonusCoefficient = INTERACTION_MATRIX[rodsInCell][rodsInNeighbor];
-            bonus += bonusCoefficient; // Sum bonuses from all neighbors
+        for (int neighborIndex : neighborIndices) {
+            int neighborRods = rodsInCells[neighborIndex];
+            bonus += INTERACTION_MATRIX[rodsInCell][neighborRods];
         }
-
         return bonus;
     }
 }

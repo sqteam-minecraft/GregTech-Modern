@@ -8,7 +8,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -54,6 +53,10 @@ public class ReactorHeatExchanger extends ReactorElement {
     @Override
     public int calculateEdgeCapacity(BlockState state, IReactorElement to) {
         if (to == null) return getMaxHeatToConsume();
+        if (to instanceof ReactorHeatVent) {//or compare by id
+            int transferableHeat = getHeatThroughput() - getMaxHeatToConsume();
+            return transferableHeat > 0 ? Math.min(transferableHeat, to.getHeatThroughput()) : 0;
+        }
         return 0;
     }
 

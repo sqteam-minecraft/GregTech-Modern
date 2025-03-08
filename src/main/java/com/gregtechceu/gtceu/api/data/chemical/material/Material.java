@@ -686,7 +686,8 @@ public class Material implements Comparable<Material> {
          * @throws IllegalArgumentException If a {@link FissionFuelProperty} has already been added to this Material.
          */
         public Builder fissionFuel(int baseHeat, Supplier<Material> materialSupplier) {
-            properties.setProperty(PropertyKey.FISSION_FUEL, new FissionFuelProperty(this.materialInfo.resourceLocation.getPath(), materialSupplier, baseHeat));
+            properties.setProperty(PropertyKey.FISSION_FUEL, new FissionFuelProperty(
+                    this.materialInfo.resourceLocation.getPath(), materialSupplier, baseHeat));
             return this;
         }
 
