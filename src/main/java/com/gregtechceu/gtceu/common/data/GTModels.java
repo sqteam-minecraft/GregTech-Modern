@@ -18,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -368,7 +369,9 @@ public class GTModels {
                     .end();
 
             for (Direction direction : Direction.Plane.HORIZONTAL) {
-                int angle = 90 * (direction.ordinal() - 2);
+                int angle = (int) direction.toYRot();
+                angle = angle % 180 == 0 ? Mth.abs(angle - 180) : angle;
+
                 builder = builder.part()
                         .modelFile(modelLink)
                         .rotationY(angle)
